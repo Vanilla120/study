@@ -1,0 +1,1255 @@
+\documentclass[a4paper,11pt]{ltjsarticle}
+
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+
+\hypersetup{
+  hidelinks,
+  pdftitle={ラックス線形代数 第2章「双対性」学習ノート},
+  pdfauthor={Study Note}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ラックス線形代数 第2章「双対性」}
+\rhead{学習ノート}
+\cfoot{\thepage}
+\setlength{\headheight}{18pt}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em}
+\setlist[enumerate]{leftmargin=2.2em,itemsep=0.35em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.35em}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\codim}{\operatorname{codim}}
+\newcommand{\sourceitem}{\textbf{【資料】}}
+\newcommand{\suppitem}{\textbf{【補足】}}
+\newcommand{\lowimportance}{\textbf{【重要度：低】}}
+\newcommand{\midimportance}{\textbf{【重要度：中】}}
+\newcommand{\highimportance}{\textbf{【重要】}}
+
+\title{\vspace{-1.5em}ラックス線形代数\\第2章「双対性」学習ノート}
+\author{}
+\date{2026年10月2日}
+
+\begin{document}
+\maketitle
+\vspace{-2em}
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\textbf{今日の中心テーマ：}
+第1章で学んだ「ベクトル空間」に対して、今度は\textbf{ベクトルからスカラーを線形に取り出す仕組み}を考える。
+これが線形汎関数と双対空間である。さらに、零化部分空間・双対基底・二重双対を理解し、
+最後に「積分という線形汎関数を点評価汎関数の線形結合で表す」という求積公式へ接続する。
+}}
+\end{center}
+
+\section{この範囲の目的}
+
+\sourceitem\ 第2章（資料 p.15--22）は、線形空間 $X$ 上の線形汎関数
+\[
+ l:X\to\K
+\]
+を導入し、その全体からなる双対空間 $X'$ を考える章である。
+章の流れは
+\[
+\boxed{
+\begin{array}{c}
+\text{線形汎関数}	o X'	o \dim X'=\dim X	o X\simeq X''\\[2pt]
+\to Y^\perp	o \dim Y^\perp+\dim Y=\dim X\\[2pt]
+\to Y^{\perp\perp}=Y	o \text{求積公式}
+\end{array}
+}
+\]
+と整理できる。
+
+第1章が「ベクトルをどう組み合わせて空間を作るか」を扱っていたのに対し、
+第2章は「そのベクトルからどのように線形な情報を読み取るか」を扱う。
+
+\suppitem\ 数値解析の観点では、線形汎関数は
+\[
+\boxed{\text{観測・積分・残差・荷重・座標抽出}}
+\]
+を統一的に扱う言葉になる。特に、弱形式、有限要素法、随伴法、データ同化、POD のモード係数などへ直接つながる。
+
+\section{必要な前提知識と第1章との接続}
+
+第1章から特に必要なのは次の概念である。
+\begin{itemize}
+  \item 線形空間と部分空間
+  \item 線形結合・線形独立
+  \item 基底と次元
+  \item 商空間 $X/Y$
+  \item 有限次元空間は基底を選べば $\K^n$ と同型になること
+\end{itemize}
+
+第1章では
+\[
+ x=c_1e_1+\cdots+c_ne_n
+\]
+によってベクトルを座標表示した。第2章では、その座標や他のスカラー情報を取り出す写像
+\[
+ l(x)
+\]
+を考える。
+
+特に後半では、第1章の商空間
+\[
+X/Y
+\]
+と、第2章の零化部分空間
+\[
+Y^\perp
+\]
+が直接結びつく。
+
+\section{重要概念1：線形汎関数}
+
+\subsection{定義}
+\sourceitem\ 線形空間 $X$ 上のスカラー値関数
+\[
+ l:X\to\K
+\]
+が、任意の $x,y\in X$、$k\in\K$ に対して
+\begin{align}
+ l(x+y)&=l(x)+l(y),\\
+ l(kx)&=k\,l(x)
+\end{align}
+を満たすとき、$l$ を\textbf{線形汎関数}という（資料 p.15）。
+
+この二つを繰り返し使えば
+\[
+ l(k_1x_1+\cdots+k_nx_n)
+ =k_1l(x_1)+\cdots+k_nl(x_n)
+\]
+となる。
+
+\subsection{直観}
+線形汎関数とは、
+\[
+\boxed{\text{ベクトルを入力すると、1個のスカラーを線形に返す測定器}}
+\]
+と考えるとよい。
+
+例えば $x=(x_1,x_2,x_3)\in\R^3$ に対して
+\[
+ l(x)=2x_1-x_2+4x_3
+\]
+は線形汎関数である。
+
+\subsection{なぜ線形性が重要か}
+基底 $e_1,\dots,e_n$ によって
+\[
+ x=c_1e_1+\cdots+c_ne_n
+\]
+と書けるなら、
+\[
+ l(x)=c_1l(e_1)+\cdots+c_nl(e_n).
+\]
+したがって、\textbf{基底ベクトルに対する $l$ の値を知れば、すべての $x$ に対する $l(x)$ が決まる}。
+
+これは第1章の
+\[
+\text{基底がベクトル全体を決める}
+\]
+という事実の双対的な見方である。
+
+\section{重要概念2：関数空間上の線形汎関数}
+
+\sourceitem\ 資料 p.16 では、関数空間上の具体例が並べられている。ここは抽象概念を具体化する上で重要である。
+
+\subsection{点評価}
+固定した $s_1\in[0,1]$ に対して
+\[
+ l(f)=f(s_1)
+\]
+と定める。これは線形汎関数である。
+
+実際、
+\[
+ l(af+bg)=(af+bg)(s_1)=af(s_1)+bg(s_1).
+\]
+
+\subsection{複数点での重み付き評価}
+\[
+ l(f)=\sum_{j=1}^n k_j f(s_j)
+\]
+も線形汎関数である。
+この形は後半の数値求積にそのまま現れる。
+
+\subsection{積分}
+\[
+ l(f)=\int_0^1 f(s)\,ds
+\]
+も線形汎関数である。積分の線形性から
+\[
+\int_0^1(af+bg)\,ds
+=a\int_0^1f\,ds+b\int_0^1g\,ds
+\]
+となる。
+
+\subsection{微分値}
+資料では微分可能な関数の空間に対し
+\[
+ l(f)=\sum_j a_j\,\partial^j f(s)
+\]
+も線形汎関数であると述べている。
+微分作用素が線形だからである。
+
+\highimportance\ 点評価・積分・微分値という一見異なる操作が、すべて「関数から数を取り出す線形汎関数」として統一されることを理解する。
+
+\section{重要概念3：有限次元では線形汎関数は係数ベクトルで表せる}
+
+\sourceitem\ 定理1（資料 p.16--17）：$X$ が $n$ 次元で、基底を選んで
+\[
+ x=(c_1,\dots,c_n)
+\]
+と表すと、任意の線形汎関数は
+\[
+\boxed{
+ l(x)=a_1c_1+\cdots+a_nc_n
+}
+\]
+という形で表される。
+
+\subsection{なぜこの形になるのか}
+基底を $e_1,\dots,e_n$ とする。任意の $x$ は
+\[
+ x=c_1e_1+\cdots+c_ne_n
+\]
+と書けるので、線形性より
+\[
+ l(x)
+ =c_1l(e_1)+\cdots+c_nl(e_n).
+\]
+ここで
+\[
+ a_j=l(e_j)
+\]
+と置けば
+\[
+ l(x)=a_1c_1+\cdots+a_nc_n.
+\]
+
+したがって、
+\[
+\boxed{l\text{ は }n\text{ 個の数 }l(e_1),\dots,l(e_n)\text{ で完全に決まる}}
+\]
+ことが分かる。
+
+\subsection{行列で見る}
+\suppitem\ 座標を列ベクトル
+\[
+\bm{c}=\begin{pmatrix}c_1\\ \vdots\\ c_n\end{pmatrix}
+\]
+と書けば、
+\[
+ l(x)=
+\begin{pmatrix}a_1&\cdots&a_n\end{pmatrix}
+\bm{c}.
+\]
+したがって有限次元では、線形汎関数は\textbf{行ベクトル}として表現できる。
+
+これは行列 $A$ の各行が、入力ベクトル $x$ に作用する一つの線形汎関数である、という見方につながる。
+
+\section{重要概念4：双対空間 $X'$}
+
+\sourceitem\ $X$ 上のすべての線形汎関数の集合を $X'$ と書き、$X$ の\textbf{双対空間}と呼ぶ（資料 p.16）。
+
+和とスカラー倍は
+\[
+(l+m)(x)=l(x)+m(x),\qquad (kl)(x)=k\,l(x)
+\]
+で定義され、$X'$ 自身が線形空間になる。
+
+\lowimportance\ $X'$ が線形空間の公理を満たすことを一つずつ確認する形式的作業は、今回の研究準備では優先度が低い。
+
+\subsection{次元}
+\sourceitem\ 定理2（資料 p.17）：有限次元線形空間について
+\[
+\boxed{\dim X'=\dim X}
+\]
+が成り立つ。
+
+理由は、$n$ 次元空間上の任意の線形汎関数が $n$ 個の係数
+\[
+(a_1,\dots,a_n)
+\]
+で一意に指定されるからである。
+
+\subsection{$X$ と $X'$ は同じものではない}
+有限次元なら同じ次元なので同型ではあるが、概念としては異なる。
+\begin{itemize}
+  \item $X$：ベクトルの空間
+  \item $X'$：ベクトルを測る線形汎関数の空間
+\end{itemize}
+
+基底や内積を選ぶと両者を座標的に同一視できるが、その同一視は追加構造に依存する。
+
+\section{重要概念5：自然なペアリングと二重双対}
+
+\subsection{ペアリング}
+\sourceitem\ 資料 p.17 では
+\[
+(l,x)\overset{\mathrm{def}}{=}l(x)
+\]
+と書き、$X'$ と $X$ を結ぶ自然な双線形な作用として扱っている。
+
+$l$ を固定すれば $x$ について線形、$x$ を固定すれば $l$ について線形である。
+
+\midimportance\ この $(l,x)$ は内積ではない。$l\in X'$、$x\in X$ という異なる空間の要素を組み合わせている点を区別する。
+
+\subsection{二重双対 $X''$}
+$X'$ の双対を
+\[
+X''=(X')'
+\]
+と書く。
+任意の $x\in X$ に対して
+\[
+J_x(l)=l(x)
+\]
+と定義すると、$J_x$ は $X'$ 上の線形汎関数なので
+\[
+J_x\in X''.
+\]
+したがって自然な写像
+\[
+J:X\to X'',\qquad x\mapsto J_x
+\]
+が得られる。
+
+\sourceitem\ 定理3（資料 p.17）：有限次元ではこの写像により
+\[
+\boxed{X\simeq X''}
+\]
+と自然に同一視できる。
+
+\subsection{なぜ $X\simeq X''$ は「自然」なのか}
+$X\to X''$ の対応
+\[
+x\mapsto[l\mapsto l(x)]
+\]
+は基底を選ばずに定義できる。
+
+一方、$X\to X'$ を具体的に作るには一般には基底や内積などの追加構造が必要である。
+
+\highimportance\ 「同じ次元だから同型」と「基底に依存しない自然な写像がある」は別の主張である。
+
+\section{重要概念6：零化部分空間 $Y^\perp$}
+
+\sourceitem\ 部分空間 $Y\subset X$ に対し、$Y$ 上でゼロになるすべての線形汎関数の集合
+\[
+\boxed{
+Y^\perp
+=
+\{l\in X'\mid l(y)=0\quad\forall y\in Y\}
+}
+\]
+を $Y$ の\textbf{零化部分空間}と呼ぶ（資料 p.18）。
+
+\subsection{直観}
+\[
+\boxed{Y^\perp=\text{$Y$ の方向を全く検出しない測定の集合}}
+\]
+である。
+
+例として
+\[
+X=\R^3,\qquad Y=\Span\{(1,0,0)\}
+\]
+を考える。一般の線形汎関数
+\[
+l(x)=a_1x_1+a_2x_2+a_3x_3
+\]
+が $Y$ 上で消えるには
+\[
+a_1=0
+\]
+でなければならない。したがって $Y^\perp$ は $a_2,a_3$ の二つの自由度を持つ。
+
+\subsection{通常の直交補空間との違い}
+記号 $Y^\perp$ から内積空間の直交補空間を連想しやすいが、この章では内積をまだ使っていない。
+ここで
+\[
+Y^\perp\subset X'
+\]
+であり、定義は
+\[
+l(y)=0
+\]
+である。
+
+後に内積によって $X$ と $X'$ を同一視すると、零化部分空間と通常の直交補空間の関係が見えるようになる。
+
+\section{重要概念7：零化部分空間の次元公式}
+
+\sourceitem\ 定理4（資料 p.18）：有限次元 $X$ と部分空間 $Y$ に対し
+\[
+\boxed{
+\dim Y^\perp+\dim Y=\dim X
+}
+\]
+が成り立つ。
+したがって
+\[
+\boxed{\dim Y^\perp=\dim X-\dim Y}
+\]
+である。
+
+$\dim Y^\perp$ は $Y$ の余次元と呼ばれ、
+\[
+\codim Y=\dim Y^\perp
+\]
+と表される。
+
+\subsection{第1章の商空間との接続}
+本書の証明の核は
+\[
+\boxed{Y^\perp\simeq (X/Y)'}
+\]
+である。
+
+$l\in Y^\perp$ なら、$y\in Y$ に対して
+\[
+l(x+y)=l(x)+l(y)=l(x).
+\]
+つまり $l$ は $x$ と $x+y$ を区別しない。したがって $l$ は $x$ 自身ではなく同値類
+\[
+[x]\in X/Y
+\]
+だけに依存する。
+
+そこで
+\[
+Y^\perp\simeq (X/Y)'
+\]
+となり、
+\begin{align*}
+\dim Y^\perp
+&=\dim (X/Y)'\\
+&=\dim(X/Y)\\
+&=\dim X-\dim Y.
+\end{align*}
+
+\highimportance\ 第1章と第2章をつなぐ最重要対応は
+\[
+\boxed{
+\begin{array}{c}
+X/Y:\ \text{$Y$ 方向の違いを同一視する}\\[3pt]
+Y^\perp:\ \text{$Y$ 方向を検出しない汎関数}
+\end{array}}
+\]
+である。
+
+\section{重要概念8：二重零化 $Y^{\perp\perp}$}
+
+$Y^\perp\subset X'$ の零化部分空間は
+\[
+Y^{\perp\perp}\subset X''
+\]
+である。有限次元では $X\simeq X''$ と同一視する。
+
+\sourceitem\ 定理5（資料 p.18--19）：
+\[
+\boxed{Y^{\perp\perp}=Y}
+\]
+である。
+
+\subsection{なぜ成り立つか}
+まず $y\in Y$ なら、任意の $l\in Y^\perp$ に対して
+\[
+l(y)=0.
+\]
+したがって
+\[
+Y\subset Y^{\perp\perp}.
+\]
+
+次に次元を使うと
+\[
+\dim Y^\perp=\dim X-\dim Y
+\]
+なので
+\[
+\dim Y^{\perp\perp}
+=\dim X'-\dim Y^\perp
+=\dim X-(\dim X-\dim Y)
+=\dim Y.
+\]
+包含関係があり、しかも次元が同じなので
+\[
+Y^{\perp\perp}=Y.
+\]
+
+\midimportance\ この証明手順を暗記する必要はないが、「$Y$ を消すすべての汎関数をもう一度消すと、有限次元では元の $Y$ が復元される」という意味は理解する。
+
+\section{重要概念9：部分集合 $S$ の零化}
+
+\sourceitem\ 資料 p.19 では部分空間に限らず、任意の部分集合 $S\subset X$ に対して
+\[
+S^\perp
+=
+\{l\in X'\mid l(s)=0\ \forall s\in S\}
+\]
+を定義している。
+
+$S$ を含む最小の部分空間を
+\[
+Y=\Span S
+\]
+とすると、定理6より
+\[
+\boxed{S^\perp=Y^\perp}
+\]
+である。
+
+これは線形性から理解できる。$S$ の各要素を消す線形汎関数は、$S$ の任意の線形結合も自動的に消すからである。
+
+\section{重要概念10：双対基底}
+
+\sourceitem\ 資料 p.21 の練習問題6(c) では、基底 $\{e_1,\dots,e_n\}$ に対し、
+\[
+ l_i(e_j)=
+ \begin{cases}
+ 1,&i=j,\\
+ 0,&i\ne j
+ \end{cases}
+\]
+を満たす線形汎関数 $l_1,\dots,l_n$ が存在し、それらが $X'$ の基底をなすことを示すよう求めている。これが\textbf{双対基底}である。
+
+通常、基底 $e_1,\dots,e_n$ に対する双対基底を
+\[
+e^1,\dots,e^n
+\]
+と書き、
+\[
+\boxed{e^i(e_j)=\delta^i_j}
+\]
+と表す。
+
+\subsection{双対基底がしていること}
+$x$ を
+\[
+x=x^1e_1+\cdots+x^ne_n
+\]
+と書けば
+\begin{align*}
+e^i(x)
+&=e^i\left(\sum_jx^je_j\right)\\
+&=\sum_jx^je^i(e_j)\\
+&=\sum_jx^j\delta^i_j\\
+&=x^i.
+\end{align*}
+したがって
+\[
+\boxed{e^i=\text{第 $i$ 座標を読み取る線形汎関数}}
+\]
+である。
+
+\subsection{行列との関係}
+\suppitem\ 基底ベクトルを列に並べた行列を
+\[
+B=[e_1\ \cdots\ e_n]
+\]
+とする。双対基底を行に並べた行列 $D$ は
+\[
+DB=I
+\]
+を満たすので
+\[
+\boxed{D=B^{-1}}
+\]
+である。
+
+つまり、\textbf{逆行列の各行は、その基底に対する双対基底}と解釈できる。
+
+\section{重要概念11：求積公式は双対空間の基底展開}
+
+\sourceitem\ 定理7（資料 p.19--20）：区間 $I$ 上の相異なる $n$ 点
+\[
+t_1,\dots,t_n
+\]
+に対し、適当な重み $m_1,\dots,m_n$ が存在して
+\[
+\boxed{
+\int_I p(t)\,dt
+=
+\sum_{j=1}^n m_jp(t_j)
+}
+\]
+が次数 $n$ 未満のすべての多項式 $p$ について成立する。
+
+\subsection{証明の構造}
+次数 $n$ 未満の多項式空間を
+\[
+X=P_{n-1}
+\]
+とすると
+\[
+\dim X=n.
+\]
+各点 $t_j$ での評価
+\[
+l_j(p)=p(t_j)
+\]
+は $X'$ の要素である。
+
+まず $l_1,\dots,l_n$ が線形独立であることを示す。
+\[
+c_1l_1+\cdots+c_nl_n=0
+\]
+と仮定し、固定した $k$ に対して
+\[
+q_k(t)=\prod_{j\ne k}(t-t_j)
+\]
+を使う。すると
+\[
+q_k(t_j)=0\quad(j\ne k),\qquad q_k(t_k)\ne0.
+\]
+よって $p=q_k$ を代入すれば
+\[
+c_kq_k(t_k)=0
+\]
+となり、$c_k=0$。すべての $k$ で同じことが言えるので、$l_j$ は線形独立である。
+
+$\dim X'=n$ なので $l_1,\dots,l_n$ は $X'$ の基底になる。
+一方、積分
+\[
+L(p)=\int_Ip(t)\,dt
+\]
+も $X'$ の要素である。したがって
+\[
+L=m_1l_1+\cdots+m_nl_n
+\]
+と展開できる。これが
+\[
+\int_Ip(t)\,dt
+=\sum_{j=1}^nm_jp(t_j)
+\]
+である。
+
+\highimportance\ 求積公式を「積分の近似公式」とだけ覚えるのではなく、
+\[
+\boxed{\text{積分汎関数を、点評価汎関数の基底で展開している}}
+\]
+と理解する。
+
+\section{Lagrange 補間との接続}
+
+\suppitem\ 正規化した Lagrange 基底
+\[
+L_k(t)=\prod_{j\ne k}\frac{t-t_j}{t_k-t_j}
+\]
+は
+\[
+L_k(t_j)=\delta_{kj}
+\]
+を満たす。
+したがって任意の $p\in P_{n-1}$ は
+\[
+p(t)=\sum_{k=1}^np(t_k)L_k(t)
+\]
+と表せる。
+
+両辺を積分すれば
+\[
+\int_Ip(t)\,dt
+=\sum_{k=1}^np(t_k)\int_IL_k(t)\,dt.
+\]
+したがって重みは
+\[
+\boxed{m_k=\int_IL_k(t)\,dt}
+\]
+である。
+
+この見方により、補間と求積が同じ基底構造から出ていることが分かる。
+
+\section{Gauss 求積への接続}
+
+\sourceitem\ 資料 p.20--21 の練習問題4では、$I=[-1,1]$、3点
+\[
+t_1=-a,\qquad t_2=0,\qquad t_3=a
+\]
+を取り、重みを求める。さらに
+\[
+a=\sqrt{\frac35}
+\]
+と選ぶと、3点しか使わないにもかかわらず次数 $5$ 以下のすべての多項式を正確に積分できることを示す。
+
+これは3点 Gauss--Legendre 求積に対応する。
+一般に Gauss 求積は $n$ 点で適切な節点を選ぶことにより、次数 $2n-1$ まで正確に積分できる。
+
+\suppitem\ 有限要素法では要素ごとに
+\[
+\int_K \phi_i\phi_j\,dx,
+\qquad
+\int_K \nabla\phi_i\cdot\nabla\phi_j\,dx
+\]
+などを計算する。このとき Gauss 求積は実装上の標準手段である。
+
+\section{工学的解釈：線形汎関数は「測定」と「制約」}
+
+有限次元離散系 $u\in\R^N$ を考える。線形汎関数は
+\[
+l(u)=c^\mathsf{T}u
+\]
+と書ける。
+複数の測定をまとめれば
+\[
+y=Cu.
+\]
+ここで $C$ の各行は一つの線形汎関数である。
+
+この見方では
+\begin{itemize}
+  \item 点センサ：$u\mapsto u(x_s)$
+  \item 平均値：$u\mapsto \int_\Omega u\,dx$
+  \item 流量：$\bm{u}\mapsto\int_\Gamma \bm{u}\cdot\bm{n}\,ds$
+  \item POD 係数：$u\mapsto\langle u,\phi_i\rangle$
+\end{itemize}
+などがすべて「状態をスカラーに変換する測定」として統一される。
+
+\section{CFD・PDE・数値解析との接続}
+
+\subsection{弱形式と双対空間}
+\suppitem\ Poisson 方程式
+\[
+-\Delta u=f
+\]
+の弱形式の一例は
+\[
+\int_\Omega \nabla u\cdot\nabla v\,dx
+=
+\int_\Omega fv\,dx.
+\]
+右辺
+\[
+v\mapsto\int_\Omega fv\,dx
+\]
+は試験関数 $v$ に作用する線形汎関数である。
+
+今後 Sobolev 空間を学ぶと、例えば
+\[
+H^{-1}(\Omega)=(H_0^1(\Omega))'
+\]
+のような双対空間が実際に現れる。
+
+したがって本章は
+\[
+\boxed{
+\text{双対空間}
+\to
+\text{弱形式}
+\to
+\text{変分法}
+\to
+\text{Galerkin法}
+\to
+\text{有限要素法}
+}
+\]
+という長期的な流れの入口である。
+
+\subsection{数値求積}
+有限要素法・スペクトル法では積分を大量に評価するため、
+\[
+\int f(x)\,dx
+\approx
+\sum_qw_qf(x_q)
+\]
+という数値求積が重要である。
+本章の定理7はその線形代数的な原型になっている。
+
+\subsection{制約と零化部分空間}
+連続・離散を問わず、「ある部分空間の成分に反応しない測定」を整理するのが $Y^\perp$ である。
+この視点は制約条件、拘束、ラグランジュ乗数、随伴法を理解するときに再び現れる。
+
+\section{乱流・POD・MLとの接続}
+
+\subsection{POD}
+POD では速度場 $u$ の第 $i$ モード係数を
+\[
+a_i=\langle u,\phi_i\rangle
+\]
+のように求める。$\phi_i$ を固定すれば
+\[
+u\mapsto\langle u,\phi_i\rangle
+\]
+は $u$ に対する線形汎関数である。
+
+したがって POD は
+\[
+\boxed{\text{流れ場からモード係数を線形に読み取る}}
+\]
+操作を含んでいる。
+
+\subsection{センサ観測とデータ同化}
+CFD の状態 $u$ からセンサ値を取り出す操作
+\[
+y=Cu
+\]
+は双対空間の有限次元的な表現である。
+状態推定、データ同化、最適センサ配置では、この観測作用素 $C$ が重要になる。
+
+\subsection{機械学習}
+線形モデル
+\[
+y=w^\mathsf{T}x+b
+\]
+では $w^\mathsf{T}x$ が線形汎関数である。
+ニューラルネットワークの線形層
+\[
+y=Wx+b
+\]
+でも、各出力は $W$ の各行による入力 $x$ の線形評価である。
+
+実務ではユークリッド内積によってベクトルと双対ベクトルを同一視することが多いため、双対空間を明示しないだけで、構造自体は同じである。
+
+\section{微分形式との将来の接続}
+
+\suppitem\ 接空間 $T_pM$ の双対
+\[
+T_p^*M
+\]
+の要素が 1-形式である。座標基底
+\[
+\frac{\partial}{\partial x^1},\dots,\frac{\partial}{\partial x^n}
+\]
+に対する双対基底が
+\[
+dx^1,\dots,dx^n
+\]
+であり、
+\[
+dx^i\left(\frac{\partial}{\partial x^j}\right)=\delta^i_j
+\]
+を満たす。
+
+これは本章の
+\[
+e^i(e_j)=\delta^i_j
+\]
+そのものである。将来、grad/curl/div、微分形式、de Rham complex へ進むときに再登場する。
+
+\section{よくある誤解}
+
+\subsection*{1. $X$ と $X'$ は同じ空間である}
+有限次元では同じ次元だが、役割が異なる。$X$ はベクトル、$X'$ はベクトルを測る汎関数の空間である。
+
+\subsection*{2. $Y^\perp$ は普通の直交補空間である}
+この章では内積を仮定していない。$Y^\perp$ は $X'$ の部分空間であり、$Y$ 上でゼロになる線形汎関数の集合である。
+
+\subsection*{3. $X\simeq X'$ と $X\simeq X''$ は同じ種類の同一視である}
+$X\simeq X''$ には基底に依存しない自然な写像がある。$X\simeq X'$ には一般に追加構造が必要である。
+
+\subsection*{4. 積分と点評価は全く別の操作である}
+どちらも関数空間からスカラーへの線形汎関数である。有限次元多項式空間では同じ双対空間の要素として扱える。
+
+\subsection*{5. 双対基底は単に別の基底である}
+双対基底は元の基底の座標を抽出するための基底であり、
+\[
+e^i(e_j)=\delta^i_j
+\]
+という明確な関係を持つ。
+
+\section{理解する価値が低い細部}
+
+今回、以下は理解はしても証明を暗記する必要はない。
+\begin{itemize}
+  \item $X'$ が線形空間になることの公理の逐語的確認
+  \item $(l,x)=l(x)$ の双線形性の形式的確認
+  \item $Y^\perp$ が部分空間になることの細かな確認
+  \item $S^\perp=(\Span S)^\perp$ の形式的証明
+  \item 定理7で用いる $q_k(t)$ の積の形の丸暗記
+  \item 練習問題4・5の個々の重みを丸暗記すること
+\end{itemize}
+
+一方、以下は抽象的でも飛ばしてはいけない。
+\[
+X',\quad \dim X'=\dim X,\quad X\simeq X'',
+\]
+\[
+Y^\perp,\quad \dim Y^\perp=\dim X-\dim Y,
+\]
+\[
+Y^\perp\simeq(X/Y)',\quad Y^{\perp\perp}=Y,
+\]
+\[
+e^i(e_j)=\delta^i_j,
+\]
+そして
+\[
+\boxed{\text{数値求積＝積分汎関数の点評価汎関数による展開}}
+\]
+である。
+
+\section{今日必ず理解すべき事項}
+
+\begin{enumerate}
+  \item 線形汎関数 $l:X\to\K$ は、ベクトルからスカラーを線形に読み取る写像である。
+  \item $X'$ は $X$ 上のすべての線形汎関数からなる双対空間である。
+  \item 有限次元では
+  \[
+  l(x)=a_1c_1+\cdots+a_nc_n
+  \]
+  と表せる。
+  \item 有限次元では
+  \[
+  \dim X'=\dim X.
+  \]
+  \item $X$ と $X'$ は同じ次元でも概念として異なる。
+  \item ペアリング $(l,x)=l(x)$ は $X'$ と $X$ の自然な作用である。
+  \item
+  \[
+  X\simeq X''
+  \]
+  は基底に依存しない自然な同一視である。
+  \item 零化部分空間
+  \[
+  Y^\perp=\{l\in X'\mid l(y)=0\ \forall y\in Y\}
+  \]
+  の意味を説明できる。
+  \item
+  \[
+  \dim Y^\perp+\dim Y=\dim X.
+  \]
+  \item
+  \[
+  Y^\perp\simeq(X/Y)'
+  \]
+  が第1章の商空間との重要な接続である。
+  \item
+  \[
+  Y^{\perp\perp}=Y.
+  \]
+  \item 双対基底は
+  \[
+  e^i(e_j)=\delta^i_j
+  \]
+  を満たし、座標を抽出する。
+  \item 点評価、積分、微分値はすべて線形汎関数である。
+  \item 求積公式は双対空間における基底展開として理解できる。
+\end{enumerate}
+
+\section{理解確認問題}
+
+\begin{enumerate}
+  \item $x\in X$ と $l\in X'$ は何が違うか、自分の言葉で説明せよ。
+  \item なぜ有限次元では任意の線形汎関数が
+  \[
+  l(x)=a_1c_1+\cdots+a_nc_n
+  \]
+  と表せるのか。
+  \item なぜ $\dim X'=\dim X$ なのか。
+  \item なぜ $X\simeq X''$ は $X\simeq X'$ より「自然」なのか。
+  \item $Y^\perp$ と $X/Y$ は、それぞれどの意味で $Y$ を「無視」しているのか。
+  \item なぜ
+  \[
+  Y^\perp\simeq(X/Y)'
+  \]
+  と考えられるのか。
+  \item なぜ
+  \[
+  \dim Y^\perp=\dim X-\dim Y
+  \]
+  となるのか。
+  \item なぜ有限次元では $Y^{\perp\perp}=Y$ となるのか。
+  \item なぜ相異なる $n$ 点での評価汎関数が $P_{n-1}'$ の基底になるのか。
+  \item なぜ
+  \[
+  \int p=\sum_jm_jp(t_j)
+  \]
+  を双対空間における基底展開と解釈できるのか。
+  \item なぜ
+  \[
+  v\mapsto\int_\Omega fv\,dx
+  \]
+  は線形汎関数なのか。
+  \item CFD のセンサ測定 $u\mapsto u(x_s)$ と双対空間の関係を説明せよ。
+\end{enumerate}
+
+\section{手計算すべき問題}
+
+\subsection{問題A：双対基底}
+\[
+e_1=\begin{pmatrix}1\\0\end{pmatrix},\qquad
+ e_2=\begin{pmatrix}1\\1\end{pmatrix}
+\]
+を $\R^2$ の基底とする。双対基底 $e^1,e^2$ を
+\[
+e^i(e_j)=\delta^i_j
+\]
+を満たすように求めよ。
+
+各汎関数を
+\[
+e^1(x)=a_1x_1+a_2x_2,
+\qquad
+e^2(x)=b_1x_1+b_2x_2
+\]
+と置いて連立一次方程式として解くこと。
+
+\subsection{問題B：零化部分空間}
+\[
+X=\R^3,
+\qquad
+Y=\Span\left\{\begin{pmatrix}1\\1\\0\end{pmatrix}\right\}
+\]
+とする。一般の汎関数
+\[
+l(x)=a_1x_1+a_2x_2+a_3x_3
+\]
+を用いて $Y^\perp$ を求め、
+\[
+\dim Y+\dim Y^\perp=3
+\]
+を確認せよ。
+
+\subsection{問題C：資料の練習問題7}
+\sourceitem\ 資料 p.22 の問題。$W\subset\R^4$ を
+\[
+W=\Span\{(1,0,-1,2),(2,3,1,1)\}
+\]
+とする。
+\[
+l(x)=c_1x_1+c_2x_2+c_3x_3+c_4x_4
+\]
+が $W^\perp$ に属するための条件を求めよ。
+
+まず
+\[
+l(1,0,-1,2)=0,
+\qquad
+l(2,3,1,1)=0
+\]
+という二本の線形方程式を立てること。
+
+\subsection{問題D：3点求積公式}
+\sourceitem\ 資料 p.20--21 の練習問題4を行う。
+\[
+I=[-1,1],\qquad t_1=-a,\quad t_2=0,\quad t_3=a
+\]
+とし、次数 $3$ 未満の多項式について
+\[
+\int_{-1}^{1}p(t)\,dt
+=m_1p(-a)+m_2p(0)+m_3p(a)
+\]
+が成立するように重みを求めよ。
+
+対称性から $m_1=m_3$ を利用するとよい。その後
+\[
+a=\sqrt{\frac35}
+\]
+を代入し、$1,t,t^2,t^3,t^4,t^5$ について正確性を確認する。
+
+\section{明日行う数値実験・Python実装課題}
+
+\subsection{課題1：双対基底を行列で確認する}
+
+\subsubsection*{数学的問題}
+基底を列に並べた行列
+\[
+B=[e_1\ \cdots\ e_n]
+\]
+を作る。双対基底を行に並べた行列 $D$ は
+\[
+DB=I
+\]
+を満たすので
+\[
+D=B^{-1}.
+\]
+
+\subsubsection*{アルゴリズム}
+\begin{enumerate}
+  \item 適当な正則行列 $B$ を作る。
+  \item $D=B^{-1}$ を計算する。
+  \item $DB$ が単位行列になることを確認する。
+  \item ランダムな係数ベクトル $c$ を作る。
+  \item $x=Bc$ とし、$Dx=c$ を確認する。
+\end{enumerate}
+
+\subsubsection*{実装の骨格}
+\begin{verbatim}
+import numpy as np
+
+B = np.array([
+    [...],
+    [...],
+    [...]
+], dtype=float)
+
+D = ...
+print(D @ B)
+
+c = np.array([...])
+x = B @ c
+print(D @ x)
+\end{verbatim}
+
+\subsubsection*{検証}
+\[
+DB\approx I,
+\qquad
+Dx\approx c
+\]
+を確認し、\textbf{双対基底が座標を読み取る}ことを数値的に確認する。
+
+\subsection{課題2：3点 Gauss--Legendre 求積}
+
+\subsubsection*{数学的問題}
+節点
+\[
+x_1=-\sqrt{\frac35},\qquad
+x_2=0,\qquad
+x_3=\sqrt{\frac35}
+\]
+を使い、今日の手計算で得た重みを用いる。
+
+単項式
+\[
+p(x)=x^k,\qquad k=0,1,\dots,8
+\]
+について、解析値
+\[
+I_k=\int_{-1}^{1}x^k\,dx
+\]
+と求積値
+\[
+Q_k=\sum_{j=1}^{3}w_jx_j^k
+\]
+を比較する。
+
+解析値は
+\[
+I_k=
+\begin{cases}
+0,&k\text{ が奇数},\\[4pt]
+\dfrac{2}{k+1},&k\text{ が偶数}
+\end{cases}
+\]
+である。
+
+\subsubsection*{実装の骨格}
+\begin{verbatim}
+import numpy as np
+
+nodes = np.array([
+    -np.sqrt(3/5),
+    0.0,
+    np.sqrt(3/5)
+])
+
+weights = np.array([
+    ...,
+    ...,
+    ...
+])
+
+for k in range(9):
+    exact = ...
+    numerical = ...
+    error = ...
+    print(k, exact, numerical, error)
+\end{verbatim}
+
+\subsubsection*{検証}
+3点 Gauss 求積では
+\[
+k\le5
+\]
+について丸め誤差を除いて正確になり、一般に $k\ge6$ では誤差が現れ始めることを確認する。
+
+\section{次に学ぶ内容との接続}
+
+第1章と第2章をまとめると、
+\[
+\boxed{
+\text{ベクトル空間}
+\longleftrightarrow
+\text{その空間を測る双対空間}
+}
+\]
+という構造が得られた。
+
+ここから線形写像・行列・随伴・内積へ進むと、双対空間の役割がより具体的になる。
+
+研究準備の長期的な流れとしては
+\[
+\boxed{
+\text{双対空間}
+\to
+\text{弱形式}
+\to
+\text{変分法}
+\to
+\text{Galerkin 法}
+\to
+\text{有限要素法}
+}
+\]
+が重要である。
+
+また、数値計算側では
+\[
+\boxed{
+\text{評価汎関数}
+\to
+\text{補間}
+\to
+\text{数値求積}
+\to
+\text{FEM の要素積分}
+}
+\]
+というつながりを意識する。
+
+\section{長期記憶用要点}
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\begin{align*}
+&l:X\to\K,\qquad l(ax+by)=al(x)+bl(y),\\[3pt]
+&X'=\{\text{$X$ 上のすべての線形汎関数}\},\\[3pt]
+&\dim X'=\dim X\qquad(\text{有限次元}),\\[3pt]
+&e^i(e_j)=\delta^i_j\qquad(\text{双対基底}),\\[3pt]
+&X\simeq X'',\qquad x\mapsto[l\mapsto l(x)],\\[3pt]
+&Y^\perp=\{l\in X'\mid l(y)=0\ \forall y\in Y\},\\[3pt]
+&\dim Y^\perp=\dim X-\dim Y,\\[3pt]
+&Y^\perp\simeq(X/Y)',\\[3pt]
+&Y^{\perp\perp}=Y.
+\end{align*}
+さらに、
+\[
+\boxed{\text{点評価・積分・微分値はすべて線形汎関数}}
+\]
+であり、求積公式
+\[
+\int p=\sum_jm_jp(t_j)
+\]
+は
+\[
+\boxed{\text{積分汎関数を点評価汎関数の基底で展開したもの}}
+\]
+と理解する。
+}}
+\end{center}
+
+\vfill
+\begin{center}
+\small
+資料：ラックス『線形代数』第2章「双対性」p.15--22。\\
+【資料】は当該章に直接含まれる内容、【補足】は数値解析・CFD・乱流・MLとの接続として追加した説明である。
+\end{center}
+
+\end{document}

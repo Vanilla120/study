@@ -1,0 +1,1497 @@
+\documentclass[a4paper,11pt]{ltjsarticle}
+
+\usepackage[margin=23mm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\hypersetup{
+  hidelinks,
+  pdftitle={ラックス線形代数 第3章「線形写像」学習ノート},
+  pdfauthor={Study Note}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ラックス線形代数 第3章「線形写像」}
+\rhead{学習ノート}
+\cfoot{\thepage}
+\setlength{\headheight}{18pt}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em}
+\setlist[enumerate]{leftmargin=2.2em,itemsep=0.35em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.35em}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\nullity}{\operatorname{nullity}}
+\newcommand{\Range}{\mathcal{R}}
+\newcommand{\Null}{\mathcal{N}}
+\newcommand{\Lcal}{\mathcal{L}}
+\newcommand{\sourceitem}{\textbf{【資料】}}
+\newcommand{\suppitem}{\textbf{【補足】}}
+\newcommand{\lowimportance}{\textbf{【重要度：低】}}
+\newcommand{\midimportance}{\textbf{【重要度：中】}}
+\newcommand{\highimportance}{\textbf{【重要】}}
+
+\title{\vspace{-1.5em}ラックス線形代数\\第3章「線形写像」学習ノート}
+\author{}
+\date{2026年10月2日}
+
+\begin{document}
+\maketitle
+\vspace{-2em}
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{
+\textbf{今日の中心テーマ：}
+第1章で学んだ線形空間、第2章で学んだ双対空間を土台に、
+「空間から空間へ線形構造を保って作用する写像」$T:X\to U$ を理解する。
+特に、像 $R_T$、零空間 $N_T$、次元定理、転置写像、相似変換、射影を、
+連立一次方程式・離散 Laplace 方程式・CFD の projection method・POD への接続まで含めて整理する。
+}}
+\end{center}
+
+\section{この範囲の目的}
+
+\sourceitem\ 第3章（資料 p.23--37）の中心は、線形写像
+\[
+T:X\to U
+\]
+を抽象的に定義し、その構造を像・零空間・転置・相似・射影へ展開することである。
+章全体は次の流れで整理できる。
+\[
+\boxed{
+\begin{array}{c}
+\text{線形写像}
+\to \text{像・零空間}
+\to \text{次元定理}
+\to \text{連立方程式・補間・離散PDE}\\[2mm]
+\to \text{和・合成・逆写像}
+\to \text{転置}
+\to \text{rank の双対性}\\[2mm]
+\to \text{作用素の代数}
+\to \text{相似変換}
+\to \text{射影}
+\end{array}}
+\]
+
+第1章では「空間そのもの」、第2章では「空間を測る線形汎関数」を扱った。
+第3章ではそれらを統一して、
+\[
+\boxed{\text{線形な作用そのものを対象として扱う}}
+\]
+ことが目的になる。
+
+\suppitem\ 数値解析では、微分作用素 $L$、離散化後の行列 $A$、補間作用素、観測作用素、射影作用素などがすべて線形写像として現れる。
+したがって本章は、CFD で最も頻繁に使う抽象線形代数の骨格に相当する。
+
+\section{必要な前提知識と第1・2章との接続}
+
+第1章から必要なのは次である。
+\begin{itemize}
+  \item 線形空間・部分空間
+  \item 線形結合・基底・次元
+  \item 商空間 $X/Y$
+  \item 直和
+\end{itemize}
+
+第2章から必要なのは次である。
+\begin{itemize}
+  \item 双対空間 $X'$
+  \item 線形汎関数 $l:X\to \K$
+  \item 零化部分空間 $Y^\perp$
+  \item 自然な同一視 $X\simeq X''$
+\end{itemize}
+
+本章ではこれらが次のように接続される。
+\[
+\boxed{X/N_T\simeq R_T}
+\]
+は第1章の商空間の応用であり、
+\[
+\boxed{R_T^\perp=N_{T'}}
+\]
+は第2章の双対性の応用である。
+
+\section{重要概念1：線形写像}
+
+\subsection{定義}
+\sourceitem\ 写像 $T:X\to U$ が、任意の $x,y\in X$、$k\in\K$ に対して
+\begin{align}
+T(x+y)&=Tx+Ty,\\
+T(kx)&=kTx
+\end{align}
+を満たすとき、$T$ を線形写像という（資料 p.23--24）。
+
+したがって有限個の線形結合について
+\[
+T\left(\sum_{j=1}^{n}a_jx_j\right)
+=\sum_{j=1}^{n}a_jTx_j
+\]
+が成り立つ。
+
+\subsection{直観}
+線形写像とは
+\[
+\boxed{\text{線形結合の構造を壊さずに、ベクトルを別のベクトルへ移す作用}}
+\]
+である。
+
+基底 $e_1,\dots,e_n$ によって
+\[
+x=\sum_{j=1}^{n}c_je_j
+\]
+と書けるなら、
+\[
+Tx=\sum_{j=1}^{n}c_jTe_j.
+\]
+したがって、\textbf{基底に対する像 $Te_j$ が分かれば $T$ は完全に決まる}。
+
+これは後に「線形写像を行列で表す」理由そのものである。
+
+\section{重要概念2：線形写像の代表例}
+
+\sourceitem\ 資料 p.24 では、多様な線形写像の例が並ぶ。ここは「行列だけが線形写像ではない」ことを理解するために重要である。
+
+\subsection{恒等写像}
+\[
+Ix=x.
+\]
+何もしない作用である。
+
+\subsection{微分作用素}
+多項式空間上で
+\[
+D=\frac{d}{ds}
+\]
+は線形である。すなわち
+\[
+D(af+bg)=aDf+bDg.
+\]
+
+\suppitem\ 将来の PDE では、$D$、$D^2$、$\nabla$、$\nabla\cdot$、$\Delta$ などの線形微分作用素を扱う。
+
+\subsection{回転}
+原点を中心とする回転
+\[
+T:\R^2\to\R^2
+\]
+は線形写像である。
+
+\subsection{線形汎関数}
+第2章の
+\[
+l:X\to\K
+\]
+も、終域が1次元の線形写像である。
+したがって双対空間は、線形写像論の特殊な場合とみなせる。
+
+\subsection{積分作用素}
+資料では
+\[
+(Tf)(x)=\int_{-1}^{1}f(y)(x-y)^2\,dy
+\]
+のような関数から関数への線形写像が例示されている。
+
+\subsection{有限次元の座標表示}
+\[
+u_i=\sum_{j=1}^{n}t_{ij}x_j
+\]
+と定義すれば、$x\mapsto u$ は線形写像である。
+後に係数 $t_{ij}$ を並べたものが行列になる。
+
+\section{重要概念3：像 $R_T$ と零空間 $N_T$}
+
+\subsection{像}
+\sourceitem\ $T:X\to U$ に対し
+\[
+\boxed{R_T=\{Tx\mid x\in X\}}
+\]
+を $T$ の像（値域）とする（資料 p.24--25）。
+
+直観的には
+\[
+\boxed{R_T=\text{Tを通して実際に到達できる出力の集合}}
+\]
+である。
+
+\subsection{零空間}
+\[
+\boxed{N_T=\{x\in X\mid Tx=0\}}
+\]
+を零空間とする。
+
+直観的には
+\[
+\boxed{N_T=\text{Tによって完全に失われる入力方向}}
+\]
+である。
+
+例えば
+\[
+T(x,y,z)=(x,y)
+\]
+なら
+\[
+N_T=\{(0,0,z)\},\qquad R_T=\R^2.
+\]
+$z$ 方向の情報は出力からは回復できない。
+
+\subsection{なぜ両方とも部分空間か}
+$Tx_1=Tx_2=0$ なら
+\[
+T(ax_1+bx_2)=aTx_1+bTx_2=0,
+\]
+なので $N_T$ は部分空間である。同様に $R_T$ も線形結合について閉じている。
+
+\lowimportance\ この部分空間性の形式的証明を暗記する必要はない。重要なのは、線形写像の構造を研究するときに $N_T$ と $R_T$ 自身が線形空間になることを使える点である。
+
+\section{重要概念4：次元定理（rank--nullity theorem）}
+
+\sourceitem\ 定理2（資料 p.25）：有限次元線形空間 $X$ に対し
+\[
+\boxed{\dim N_T+\dim R_T=\dim X.}
+\]
+
+現代的な記号では
+\[
+\boxed{\nullity T+\rank T=\dim X.}
+\]
+
+\subsection{なぜ成り立つか：商空間による理解}
+ここは本章前半で最も重要な考え方である。
+
+もし
+\[
+x_1-x_2\in N_T
+\]
+なら
+\[
+T(x_1-x_2)=0
+\]
+だから
+\[
+Tx_1=Tx_2.
+\]
+つまり $T$ は $N_T$ 方向の違いを区別しない。
+
+そこで $T$ は本質的に商空間上の写像
+\[
+\overline T:X/N_T\to R_T,
+\qquad
+\overline T([x])=Tx
+\]
+とみなせる。
+この写像は一対一かつ全射なので
+\[
+\boxed{X/N_T\simeq R_T.}
+\]
+
+第1章の次元公式
+\[
+\dim(X/N_T)=\dim X-\dim N_T
+\]
+と
+\[
+\dim(X/N_T)=\dim R_T
+\]
+を組み合わせると
+\[
+\dim N_T+\dim R_T=\dim X
+\]
+が得られる。
+
+\highimportance\ 次元定理は単なる数え上げではなく、
+\[
+\boxed{\text{入力空間}=\text{失われる自由度}+\text{出力として残る自由度}}
+\]
+という情報分解と解釈する。
+
+\section{次元定理の重要な帰結}
+
+\subsection{未知数の方が多い同次連立方程式}
+\sourceitem\ $T:\R^n\to\R^m$ で $m<n$ とする（資料 p.25--26）。
+\[
+\dim R_T\le m<n
+\]
+なので
+\[
+\dim N_T=n-\dim R_T>0.
+\]
+よって
+\[
+Tx=0
+\]
+には非零解が存在する。
+
+これは
+\[
+\boxed{\text{未知数の数が独立な条件数より多ければ自由度が残る}}
+\]
+という連立一次方程式の基本原理である。
+
+\subsection{同次元なら単射・全射・可逆が同値}
+$\dim X=\dim U=n$ とする。
+
+$N_T=\{0\}$ なら
+\[
+\dim R_T=n
+\]
+なので $R_T=U$ である。
+したがって有限次元かつ同次元では
+\[
+\boxed{
+\text{単射}\iff\text{全射}\iff\text{可逆}
+}
+\]
+となる。
+
+\highimportance\ この同値には「有限次元」「定義域と終域が同じ次元」という仮定が必要である。
+
+\subsection{非同次方程式の一意可解性}
+正方な系
+\[
+Tx=u
+\]
+について、同次系 $Tx=0$ が零解しか持たなければ $T$ は単射であり、同次元なので全射でもある。
+したがって任意の $u$ に対して解が存在し、しかも一意である。
+
+\[
+\boxed{
+Tx=0\text{ が零解のみ}
+\Longrightarrow
+Tx=u\text{ は任意の }u\text{ に対して一意可解}
+}
+\]
+
+\section{応用1：多項式補間}
+
+\sourceitem\ 資料 p.26--27 では、次数 $<n$ の多項式空間 $X$ と $U=\C^n$ に対し
+\[
+Tp=(p(s_1),\dots,p(s_n))
+\]
+を考える。$s_1,\dots,s_n$ は互いに異なる。
+
+もし $Tp=0$ なら
+\[
+p(s_1)=\cdots=p(s_n)=0.
+\]
+次数 $<n$ の非零多項式は $n$ 個の異なる零点を持てないので
+\[
+p=0.
+\]
+したがって
+\[
+N_T=\{0\}.
+\]
+さらに
+\[
+\dim X=\dim U=n
+\]
+なので $T$ は可逆である。
+
+ゆえに任意の値 $y_1,\dots,y_n$ に対して
+\[
+p(s_j)=y_j
+\]
+を満たす次数 $<n$ の多項式がただ1つ存在する。
+
+\subsection{第2章との接続}
+第2章では各
+\[
+l_j(p)=p(s_j)
+\]
+を線形汎関数として考えた。
+第3章ではそれらをまとめて
+\[
+Tp=(l_1(p),\dots,l_n(p))
+\]
+という1個の線形写像として扱っている。
+
+\suppitem\ CFD やデータ同化では、複数のセンサ測定 $l_i(u)$ をまとめて
+\[
+y=Cu
+\]
+とするのと同じ構造である。
+
+\section{応用2：区間平均値と有限体積法への接続}
+
+\sourceitem\ 資料 p.27 では、互いに素な区間 $S_1,\dots,S_n$ に対して
+\[
+\bar p_j=\frac{1}{|S_j|}\int_{S_j}p(s)\,ds
+\]
+を定義し、
+\[
+Tp=(\bar p_1,\dots,\bar p_n)
+\]
+を考える。
+
+各成分は第2章で扱った積分型の線形汎関数であり、それらをまとめると線形写像になる。
+
+\suppitem\ 有限体積法では、未知量として点値ではなくセル平均
+\[
+\bar u_i=\frac{1}{|C_i|}\int_{C_i}u(x)\,dx
+\]
+を使う。したがって本例は
+\[
+\boxed{\text{cell average を並べる観測写像}}
+\]
+という有限体積法の考え方に非常に近い。
+
+\section{応用3：Laplace方程式の有限差分}
+
+\sourceitem\ 資料 p.27--28 では、平面領域 $G$ 上の Laplace 方程式
+\[
+\Delta u=u_{xx}+u_{yy}=0
+\]
+を格子上で差分化する。
+
+格子間隔を $h$ とすると中央差分により
+\[
+u_{xx}\approx\frac{u_W-2u_O+u_E}{h^2},
+\qquad
+u_{yy}\approx\frac{u_N-2u_O+u_S}{h^2}.
+\]
+これを代入すると
+\[
+u_W+u_N+u_E+u_S-4u_O=0
+\]
+となり、
+\[
+\boxed{
+u_O=\frac{u_W+u_N+u_E+u_S}{4}.}
+\]
+
+\subsection{数式の意味}
+内部格子点の値は、その上下左右の平均である。
+したがって内部点だけが周囲より大きい最大値を取ることはできない。
+
+\subsection{離散最大値原理の考え方}
+内部点 $O$ が最大値 $M$ を取るとする。
+周囲4点はすべて $\le M$ であるが、その平均が $M$ に等しいので
+\[
+u_W=u_N=u_E=u_S=M.
+\]
+同じ議論を隣接点に繰り返すと、最大値は境界まで伝播する。
+境界値がすべて0なら $M=0$ である。
+最小値についても同様なので、同次境界値問題の解は
+\[
+u\equiv0
+\]
+しかない。
+
+したがって離散作用素の零空間は自明であり、正方な系なら任意の Dirichlet 境界条件に対して解は一意である。
+
+\subsection{CFDとの接続}
+\suppitem\ ここにはすでに
+\[
+\boxed{
+\text{PDE}
+\to
+\text{離散化}
+\to
+A\bm u=\bm b
+\to
+\text{kernel}
+\to
+\text{一意性}
+}
+\]
+という CFD の基本構造が入っている。
+
+非圧縮 CFD では圧力 Poisson 方程式
+\[
+\Delta p=f
+\]
+を繰り返し解くため、離散 Laplacian の零空間と可解条件は今後非常に重要になる。
+
+\section{重要概念5：線形写像全体の線形空間 $\Lcal(X,U)$}
+
+\sourceitem\ 資料 p.29 では、$T,S:X\to U$ に対し
+\[
+(T+S)x=Tx+Sx
+\]
+と定め、線形写像全体も線形空間を作ることを確認する。
+この空間を
+\[
+\boxed{\Lcal(X,U)}
+\]
+と表す。
+
+\lowimportance\ 線形空間の公理を逐一確認する必要はない。
+重要なのは「写像そのものをベクトルとして足したりスカラー倍できる」ことである。
+
+\section{重要概念6：写像の合成と非可換性}
+
+$T:X\to U$、$S:U\to V$ に対し
+\[
+S\circ T:X\to V,
+\qquad
+(S\circ T)(x)=S(Tx)
+\]
+を定義する。通常 $ST$ と略記する。
+
+\[
+\boxed{STx=S(Tx)}
+\]
+なので $T$ が先、$S$ が後である。
+
+\subsection{一般には可換でない}
+通常
+\[
+\boxed{ST\ne TS.}
+\]
+
+資料 p.30 の例では、微分 $D$ と「変数 $s$ を掛ける作用」を考えると
+\[
+D(sf)=f+sDf
+\]
+であるが
+\[
+sDf
+\]
+とは一致しない。
+したがって $Ds\ne sD$ である。
+
+\subsection{CFD・数値解析との接続}
+\suppitem\ 作用素分割では、$A$ と $B$ が可換しないと
+\[
+e^{\Delta t(A+B)}\ne e^{\Delta t A}e^{\Delta t B}
+\]
+となる。Strang splitting などの誤差の背景には、作用素の非可換性がある。
+
+\section{重要概念7：逆写像}
+
+線形写像 $T$ が一対一かつ全射なら逆写像 $T^{-1}$ が存在する。
+
+\sourceitem\ 資料 p.30 の定理4より、$S,T$ が可逆なら
+\[
+\boxed{(ST)^{-1}=T^{-1}S^{-1}.}
+\]
+順序が逆になる。
+
+理由は
+\[
+(T^{-1}S^{-1})(ST)
+=T^{-1}(S^{-1}S)T
+=I.
+\]
+
+\section{重要概念8：転置写像}
+
+ここは第2章の双対空間を直接使う、本章後半の核心である。
+
+\sourceitem\ $T:X\to U$ とし、$l\in U'$ に対して
+\[
+l\circ T:X\to\K
+\]
+は $X'$ の元になる。
+そこで転置写像
+\[
+\boxed{T':U'\to X'}
+\]
+を
+\[
+\boxed{(T'l,x)=(l,Tx)}
+\]
+で定義する（資料 p.30--31）。
+
+\subsection{直観}
+$l\in U'$ は出力 $u$ を測る汎関数である。
+出力が $u=Tx$ なら
+\[
+l(u)=l(Tx).
+\]
+これは入力 $x$ に直接作用する別の汎関数 $T'l$ と見なせる。
+
+したがって転置は
+\[
+\boxed{\text{出力側の測定を、入力側へ引き戻す操作}}
+\]
+である。
+
+\subsection{行列転置との関係}
+座標表示で
+\[
+u_i=\sum_j t_{ij}x_j
+\]
+とし、
+\[
+l(u)=\sum_i l_i u_i
+\]
+とすると
+\[
+l(Tx)=\sum_j\left(\sum_i l_i t_{ij}\right)x_j.
+\]
+したがって $T'l$ の係数は
+\[
+m_j=\sum_i l_i t_{ij}
+\]
+であり、$T'$ の行列は $T$ の行列の転置になる。
+
+\highimportance\ 「転置＝行列の縦横交換」とだけ覚えないこと。本質は双対空間間の写像
+\[
+T':U'\to X'
+\]
+であり、その座標表示が行列転置になる。
+
+\subsection{転置と随伴の違い}
+\suppitem\ この段階の $T'$ は内積を使っていない。後に内積によって $X\simeq X'$ と同一視すると、随伴作用素 $T^*$ が現れる。
+CFD の随伴法・最適化・感度解析では $T^*$ が重要になる。
+
+\section{転置に関する基本公式}
+
+資料の練習問題から、次を確認しておく。
+\[
+\boxed{(ST)'=T'S'}
+\]
+\[
+\boxed{(T+R)'=T'+R'}
+\]
+\[
+\boxed{(T^{-1})'=(T')^{-1}}
+\]
+
+特に合成の転置では順序が逆になる。
+
+第2章の自然な同一視 $X\simeq X''$、$U\simeq U''$ を使えば
+\[
+\boxed{T''=T.}
+\]
+これは行列での
+\[
+(A^{\mathsf T})^{\mathsf T}=A
+\]
+の抽象版である。
+
+\section{重要概念9：値域と転置の零空間}
+
+\sourceitem\ 定理5（資料 p.32）：
+\[
+\boxed{R_T^\perp=N_{T'}.}
+\]
+
+\subsection{なぜ成り立つか}
+$l\in R_T^\perp$ とは
+\[
+l(u)=0\qquad \forall u\in R_T
+\]
+である。
+$u=Tx$ と書けるので
+\[
+l(Tx)=0\qquad \forall x\in X.
+\]
+転置の定義より
+\[
+(T'l,x)=0\qquad \forall x.
+\]
+したがって
+\[
+T'l=0,
+\]
+すなわち $l\in N_{T'}$ である。
+
+第2章の二重零化 $Y^{\perp\perp}=Y$ を使えば
+\[
+\boxed{R_T=N_{T'}^\perp}
+\]
+も得られる。
+
+\subsection{方程式の可解条件として読む}
+方程式
+\[
+Tx=b
+\]
+が解けるためには
+\[
+b\in R_T
+\]
+でなければならない。
+しかし
+\[
+R_T=N_{T'}^\perp
+\]
+なので
+\[
+\boxed{
+Tx=b\text{ が可解}
+\iff
+l(b)=0\quad \forall l\in N_{T'}
+}
+\]
+となる。
+
+\suppitem\ これは有限次元における Fredholm alternative 的な構造であり、PDE の可解条件へ直結する。
+
+\subsection{Poisson方程式との接続}
+Neumann 境界条件の Poisson 方程式では定数モードが零空間に残るため、右辺に整合条件が必要になる。
+連続系では典型的に
+\[
+\int_\Omega f\,dx=0
+\]
+である。
+離散系でも左零空間のベクトル $z$ に対し
+\[
+z^{\mathsf T}b=0
+\]
+が必要になる。
+これはまさに
+\[
+R_A=N_{A^{\mathsf T}}^\perp
+\]
+である。
+
+\section{重要概念10：rank は転置で変わらない}
+
+\sourceitem\ 定理6（資料 p.33）：
+\[
+\boxed{\dim R_T=\dim R_{T'}.}
+\]
+したがって
+\[
+\boxed{\rank T=\rank T'.}
+\]
+
+これは行列に基底を選んだときの
+\[
+\boxed{\text{列階数}=\text{行階数}}
+\]
+の抽象版である。
+
+\subsection{考え方}
+定理5より
+\[
+N_{T'}=R_T^\perp.
+\]
+第2章の次元公式から
+\[
+\dim N_{T'}=\dim U-\dim R_T.
+\]
+一方、$T'$ に rank--nullity を適用すると
+\[
+\dim R_{T'}=\dim U'-\dim N_{T'}.
+\]
+有限次元では $\dim U'=\dim U$ なので
+\[
+\dim R_{T'}=\dim R_T.
+\]
+
+\section{重要概念11：自己写像の代数 $\Lcal(X,X)$}
+
+$T:X\to X$ のように同じ空間へ戻る線形写像を線形作用素と考える。
+$\Lcal(X,X)$ では
+\begin{itemize}
+  \item 和
+  \item スカラー倍
+  \item 積（合成）
+\end{itemize}
+が可能であり、代数をなす。
+
+一般には
+\[
+ST\ne TS
+\]
+なので非可換である。
+
+\subsection{零因子・nilpotent の例}
+資料 p.34 では、次数 $<2$ の多項式空間上の微分 $D$ について
+\[
+D\ne0,
+\qquad
+D^2=0
+\]
+となる例が挙げられる。
+
+\midimportance\ 今は「非零作用素でも何回か作用すると0になることがある」と理解すればよい。後に nilpotent operator、Jordan 標準形へつながる。
+
+\section{重要概念12：一般線形群と相似変換}
+
+可逆な自己線形写像全体は合成について群をなし、
+\[
+GL(n,\K)
+\]
+と書く（$n=\dim X$）。
+
+\lowimportance\ 群の公理の逐語的確認は今は不要である。
+
+\subsection{相似変換}
+\sourceitem\ 可逆な $S$ に対して
+\[
+\boxed{M_S=SMS^{-1}}
+\]
+を考え、$M$ と $M_S$ を相似とする（資料 p.34--36）。
+
+\subsection{直観}
+相似変換は
+\[
+\boxed{\text{同じ線形作用を、異なる基底・座標系で見たもの}}
+\]
+と理解する。
+
+したがって相似変換で変わらない量は「座標の選び方ではなく、作用素そのものに固有の性質」である。
+
+\suppitem\ 後の固有値問題では
+\[
+B=SAS^{-1}
+\]
+によって座標を変え、できるだけ簡単な形、特に対角行列へ変換する。
+これは対角化・モード分解へ直結する。
+
+\subsection{相似が同値関係であること}
+資料では反射律・対称律・推移律を確認している。
+
+\lowimportance\ 証明手順の暗記は不要。重要なのは「相似な作用素を同じ種類の線形作用として分類できる」ことである。
+
+\section{重要概念13：作用素の多項式 $p(A)$}
+
+\sourceitem\ 多項式
+\[
+p(s)=a_Ns^N+\cdots+a_1s+a_0
+\]
+に対して
+\[
+\boxed{
+p(A)=a_NA^N+\cdots+a_1A+a_0I
+}
+\]
+を定義する（資料 p.36）。
+
+\suppitem\ 数値解析では、行列関数や時間発展
+\[
+e^{\Delta tA}
+\]
+を多項式近似する際に $p(A)$ が現れる。また Krylov 部分空間
+\[
+\Span\{b,Ab,A^2b,\dots\}
+\]
+の基礎でもある。
+
+\section{重要概念14：射影 $P^2=P$}
+
+\sourceitem\ 線形作用素 $P:X\to X$ が
+\[
+\boxed{P^2=P}
+\]
+を満たすとき射影という（資料 p.36--37）。
+
+\subsection{直観}
+一度射影した $Px$ はすでに射影先の空間にいるため、もう一度射影しても変わらない。
+
+資料の例では
+\[
+P(a_1,a_2,a_3,\dots,a_n)
+=(0,0,a_3,\dots,a_n)
+\]
+や、関数に対し
+\[
+(Pf)(x)=\frac{f(x)+f(-x)}{2}
+\]
+として偶関数成分を取り出す写像が挙げられている。
+
+\subsection{第1章の直和との接続}
+任意の $x$ について
+\[
+x=Px+(x-Px).
+\]
+ここで
+\[
+Px\in R_P
+\]
+であり
+\[
+P(x-Px)=Px-P^2x=0
+\]
+なので
+\[
+x-Px\in N_P.
+\]
+さらに $R_P\cap N_P=\{0\}$ であるから
+\[
+\boxed{X=R_P\oplus N_P.}
+\]
+
+\highimportance\ 射影は第1章の直和分解を「実際に成分へ分ける作用素」として実現している。
+
+\subsection{CFD：projection method}
+\suppitem\ 非圧縮 Navier--Stokes 方程式では、速度場を
+\[
+\nabla\cdot\bm u=0
+\]
+を満たす部分空間へ射影する。
+概念的には
+\[
+\bm u^{*}\mapsto P\bm u^{*}=\bm u^{n+1}
+\]
+であり、適切な理想化では
+\[
+P^2=P
+\]
+を満たす。
+
+したがって
+\[
+\boxed{
+\text{部分空間・直和}
+\to
+\text{射影}
+\to
+\text{Helmholtz/Hodge 分解}
+\to
+\text{非圧縮流 projection method}
+}
+\]
+という流れがある。
+
+\subsection{乱流・PODとの接続}
+POD の低次元空間
+\[
+V_r=\Span\{\phi_1,\dots,\phi_r\}
+\]
+への直交射影は
+\[
+P_ru=\sum_{i=1}^{r}\langle u,\phi_i\rangle\phi_i
+\]
+であり
+\[
+P_r^2=P_r.
+\]
+したがって射影作用素は reduced-order modeling の中心にも現れる。
+
+\section{交換子と可換性}
+
+資料末尾では、二つの作用素の交換子
+\[
+[A,B]=AB-BA
+\]
+に相当する概念が現れる。
+\[
+[A,B]=0
+\]
+なら $AB=BA$ である。
+
+\lowimportance\ 現段階では「可換性を測る量」と理解できれば十分である。作用素分割やスペクトル理論では後に重要になる。
+
+\section{本章の概念を CFD・数値解析・乱流・ML へ対応させる}
+
+\begin{longtable}{p{0.27\linewidth}p{0.65\linewidth}}
+\toprule
+\textbf{第3章の概念} & \textbf{今後の接続}\\
+\midrule
+\endhead
+線形写像 $T$ & 微分作用素、積分作用素、離散作用素、ニューラルネットの線形層\\
+零空間 $N_T$ & PDE の非一意性、圧力の定数モード、ゲージ自由度\\
+像 $R_T$ & 到達可能な右辺、出力空間、表現可能なデータ\\
+rank--nullity & 自由度の数え上げ、rank deficiency、拘束条件\\
+$X/N_T\simeq R_T$ & 冗長自由度を商で除き、本質的な出力自由度を見る\\
+離散 Laplacian & Poisson solver、圧力補正、拡散方程式\\
+合成 $ST$ & 作用素分割、多段時間積分、計算グラフ\\
+転置 $T'$ & 随伴法の前段階、逆問題、感度、勾配計算\\
+$R_T=N_{T'}^\perp$ & PDE の可解条件、Fredholm alternative 的構造\\
+相似変換 & 基底変換、固有値、対角化、モード解析\\
+$p(A)$ & 行列関数、Krylov 法、時間発展近似\\
+射影 $P$ & Helmholtz/Hodge 分解、projection method、POD/PCA\\
+\bottomrule
+\end{longtable}
+
+\section{数値計算の観点から見た第3章}
+
+抽象的な線形作用素 $L$ が PDE を表すとする。
+数値離散化すると
+\[
+Lu=f
+\quad\longrightarrow\quad
+A\bm u=\bm f.
+\]
+このとき重要な問いは
+\begin{itemize}
+  \item $N_A=\{0\}$ か？
+  \item $R_A$ は右辺を含むか？
+  \item $\rank A$ は何か？
+  \item $A^{-1}$ は存在するか？
+  \item $A^{\mathsf T}$ の零空間は何か？
+\end{itemize}
+である。
+
+したがって、CFD で巨大な疎行列を扱うようになっても、本質的な問いは本章の
+\[
+\boxed{\text{kernel / range / rank / transpose / projection}}
+\]
+に戻る。
+
+\section{理解する価値が低い細部}
+
+次は、結論は知っておくべきだが、現時点で証明手順を暗記する価値は低い。
+\begin{itemize}
+  \item 像・零空間が部分空間になることの形式的公理確認
+  \item $\Lcal(X,U)$ の線形空間公理の逐語的確認
+  \item 合成の分配法則の細かな式変形
+  \item 逆写像が線形であることの形式的証明
+  \item $GL(n,\K)$ が群をなすことの詳細
+  \item 相似関係が反射・対称・推移律を満たす証明の暗記
+  \item 相似変換の合成則の細かな式変形
+  \item 零因子や交換子の一般代数論
+\end{itemize}
+
+一方、次は証明を丸暗記しなくても、\textbf{なぜそうなるかを説明できる必要がある}。
+\begin{itemize}
+  \item $X/N_T\simeq R_T$
+  \item rank--nullity theorem
+  \item $R_T^\perp=N_{T'}$
+  \item $R_T=N_{T'}^\perp$
+  \item $\rank T=\rank T'$
+  \item $X=R_P\oplus N_P$
+\end{itemize}
+
+\section{よくある誤解}
+
+\subsection*{誤解1：線形写像と行列は同じ}
+行列は基底を選んだ後の表現である。
+\[
+\boxed{\text{線形写像が本体、行列は座標表示}}
+\]
+と区別する。
+
+\subsection*{誤解2：零空間が0なら常に全射}
+一般には誤りである。有限次元かつ $\dim X=\dim U$ という条件が必要である。
+
+\subsection*{誤解3：$ST=TS$}
+一般には成立しない。作用する順序は重要である。
+
+\subsection*{誤解4：転置は単に行列を縦横交換する操作}
+本質は
+\[
+(T'l,x)=(l,Tx)
+\]
+で定義される双対空間間の写像である。
+
+\subsection*{誤解5：射影は必ず直交射影}
+本章の射影は
+\[
+P^2=P
+\]
+だけを仮定する。直交性には内積が必要である。
+
+\section{今日必ず理解すべき事項}
+
+\begin{enumerate}
+  \item 線形写像は線形結合を保存する。
+  \item $R_T$ は到達可能な出力、$N_T$ は $T$ が消してしまう入力方向である。
+  \item
+  \[
+  \boxed{\dim N_T+\dim R_T=\dim X}
+  \]
+  を理解する。
+  \item 次元定理の本質は
+  \[
+  \boxed{X/N_T\simeq R_T}
+  \]
+  である。
+  \item 有限次元・同次元では
+  \[
+  \boxed{\text{単射}\iff\text{全射}\iff\text{可逆}}
+  \]
+  である。
+  \item 多項式補間の存在一意性が次元論から導ける。
+  \item Laplace 方程式の中央差分が
+  \[
+  u_O=\frac{u_N+u_S+u_E+u_W}{4}
+  \]
+  になる意味を説明できる。
+  \item 写像の合成は一般に非可換である。
+  \item 転置は
+  \[
+  T':U'\to X',\qquad (T'l,x)=(l,Tx)
+  \]
+  で定義される。
+  \item
+  \[
+  \boxed{R_T^\perp=N_{T'}}
+  \]
+  の意味を理解する。
+  \item
+  \[
+  \boxed{\rank T=\rank T'}
+  \]
+  を理解する。
+  \item 相似変換 $SMS^{-1}$ は基底変更と関係する。
+  \item 射影は $P^2=P$ を満たし、
+  \[
+  \boxed{X=R_P\oplus N_P}
+  \]
+  となる。
+  \item これらが行列・固有値・Poisson 方程式・projection method・POD へ続くことを把握する。
+\end{enumerate}
+
+\section{理解確認問題}
+
+\subsection*{概念確認}
+\begin{enumerate}
+  \item 線形写像と、その行列表示の違いを説明せよ。
+  \item $N_T$ を「失われる情報」と解釈できる理由を説明せよ。
+  \item なぜ $X/N_T\simeq R_T$ なのか説明せよ。
+  \item 次元定理から、未知数の方が方程式数より多い同次連立方程式に非零解が存在する理由を説明せよ。
+\end{enumerate}
+
+\subsection*{「なぜ？」を問う問題}
+\begin{enumerate}[resume]
+  \item $\dim X=\dim U<\infty$ のとき、なぜ単射なら全射なのか。
+  \item 次数 $<n$ の多項式が $n$ 個の異なる点で0ならなぜ零多項式なのか。それが補間の存在一意性とどう関係するか。
+  \item 離散 Laplace 方程式で、内部最大値が周囲へ伝播する理由を説明せよ。
+  \item なぜ一般には $ST\ne TS$ なのか。
+  \item 転置を「出力側の測定を入力側へ引き戻す操作」と説明せよ。
+  \item なぜ $R_T^\perp=N_{T'}$ なのか。
+  \item なぜ $Tx=b$ の可解性が $N_{T'}$ と関係するのか。
+  \item 射影 $P^2=P$ から $X=R_P\oplus N_P$ を説明せよ。
+\end{enumerate}
+
+\section{手計算すべき問題}
+
+\subsection*{問題A：像・零空間・次元定理}
+\[
+T:\R^3\to\R^2,
+\qquad
+T\begin{pmatrix}x\\y\\z\end{pmatrix}
+=
+\begin{pmatrix}x+y\\y+z\end{pmatrix}
+\]
+について
+\[
+N_T,\quad R_T,\quad \dim N_T,\quad \dim R_T
+\]
+を求め、
+\[
+\dim N_T+\dim R_T=3
+\]
+を確認する。
+
+\subsection*{問題B：合成の非可換性}
+多項式に対して
+\[
+Df=f',\qquad Mf=xf
+\]
+とする。
+$DMf$ と $MDf$ を計算し、
+\[
+(DM-MD)f
+\]
+を求める。
+
+\subsection*{問題C：転置と零空間}
+\[
+A=
+\begin{pmatrix}
+1&1&0\\
+0&1&1
+\end{pmatrix}
+\]
+について
+\[
+N_A,\qquad N_{A^{\mathsf T}},\qquad R_A
+\]
+を求め、
+\[
+R_A^\perp=N_{A^{\mathsf T}}
+\]
+を確認する。
+
+\subsection*{問題D：射影}
+\[
+P=
+\begin{pmatrix}
+1&0&0\\
+0&1&0\\
+0&0&0
+\end{pmatrix}
+\]
+について $P^2=P$ を確認し、$R_P$ と $N_P$ を求めて
+\[
+\R^3=R_P\oplus N_P
+\]
+を確認する。
+
+\subsection*{問題E：離散 Laplace}
+中心点 $O$ の近傍値が
+\[
+u_N=1,\quad u_S=2,\quad u_E=3,\quad u_W=4
+\]
+のとき $u_O$ を求める。
+さらに、なぜ内部点が4近傍の最大値を超えられないか説明する。
+
+\section{明日行う数値実験・Python実装課題}
+
+今回の最優先課題は
+\[
+\boxed{\text{離散 Laplace 作用素で kernel・rank・一意性を数値的に確認する}}
+\]
+ことである。
+
+\subsection{数学的問題}
+正方領域の内部格子点で
+\[
+4u_{i,j}
+-u_{i+1,j}-u_{i-1,j}-u_{i,j+1}-u_{i,j-1}
+=b_{i,j}
+\]
+を作り、Dirichlet 境界条件のもとで
+\[
+A\bm u=\bm b
+\]
+とする。
+
+\subsection{アルゴリズム}
+内部格子を $N\times N$ とし、格子点 $(i,j)$ を1次元番号
+\[
+k=iN+j
+\]
+へ対応させる。
+各内部点について
+\begin{itemize}
+  \item 対角成分に $4$
+  \item 内部近傍に $-1$
+  \item 境界からの寄与を右辺へ移す
+\end{itemize}
+。
+
+\subsection{実装骨格}
+\begin{verbatim}
+import numpy as np
+
+N = 5
+n = N * N
+A = np.zeros((n, n))
+b = np.zeros(n)
+
+for i in range(N):
+    for j in range(N):
+        k = i * N + j
+        A[k, k] = 4.0
+        # neighboring entries and boundary contributions
+\end{verbatim}
+
+\subsection{自分で実装する部分}
+\begin{enumerate}
+  \item $(i,j)\leftrightarrow k$ の対応
+  \item 4近傍への $-1$ の配置
+  \item 境界条件の右辺への組み込み
+  \item 解ベクトルを2次元格子へ戻す処理
+\end{enumerate}
+
+\subsection{検証1：rank}
+\begin{verbatim}
+np.linalg.matrix_rank(A)
+\end{verbatim}
+を用い、Dirichlet 問題では
+\[
+\rank A=N^2
+\]
+となることを確認する。
+
+\subsection{検証2：最小特異値と零空間}
+SVD
+\[
+A=U\Sigma V^{\mathsf T}
+\]
+を計算し、最小特異値 $\sigma_{\min}$ を確認する。
+零空間が自明なら理論上 $\sigma_{\min}>0$ である。
+
+\subsection{検証3：残差}
+\[
+A\bm u=\bm b
+\]
+を解いた後、
+\[
+\bm r=A\bm u-\bm b
+\]
+として
+\[
+\|\bm r\|_2
+\]
+が丸め誤差程度であることを確認する。
+
+\subsection{検証4：離散最大値原理}
+解について
+\[
+\max_{\text{interior}}u
+\]
+が境界最大値を超えないこと、
+\[
+\min_{\text{interior}}u
+\]
+が境界最小値を下回らないことを確認する。
+
+\subsection{発展課題：零空間を持つ Laplacian}
+余裕があれば周期境界または純 Neumann 型の離散 Laplacian を作り、
+\[
+A\bm 1=0
+\]
+を確認する。
+この場合
+\[
+N_A\ne\{0\},\qquad \rank A<n
+\]
+となる。
+
+さらに、$A\bm p=\bm b$ が解を持つためには左零空間の $\bm z$ に対し
+\[
+\bm z^{\mathsf T}\bm b=0
+\]
+が必要であることを数値的に確認する。
+
+これは
+\[
+\boxed{R_A=N_{A^{\mathsf T}}^\perp}
+\]
+の直接的な数値実験であり、非圧縮 CFD の圧力 Poisson 方程式へ接続する。
+
+\section{次に学ぶ内容との接続}
+
+本章では $T:X\to U$ を抽象的に扱った。
+次に基底を選ぶと線形写像は行列 $A$ として表現される。
+\[
+\boxed{T\longrightarrow A}
+\]
+
+対応関係は
+\[
+N_T\longleftrightarrow \operatorname{null}(A),
+\]
+\[
+R_T\longleftrightarrow \operatorname{col}(A),
+\]
+\[
+T'\longleftrightarrow A^{\mathsf T},
+\]
+\[
+T^{-1}\longleftrightarrow A^{-1},
+\]
+\[
+ST\longleftrightarrow BA,
+\]
+\[
+SMS^{-1}\longleftrightarrow SAS^{-1}.
+\]
+
+したがって次の行列論では、行列を単なる数表ではなく
+\[
+\boxed{\text{線形写像の基底に依存した座標表現}}
+\]
+として読むことが重要である。
+
+さらに今後は
+\[
+\text{相似変換}
+\to
+\text{固有値・固有ベクトル}
+\to
+\text{対角化}
+\to
+\text{PDEのモード}
+\]
+および
+\[
+\text{射影}
+\to
+\text{Helmholtz/Hodge decomposition}
+\to
+\text{非圧縮CFD}
+\]
+へ進む。
+
+\section{長期記憶用要点}
+
+\begin{center}
+\fbox{\parbox{0.93\linewidth}{
+\textbf{1. 線形写像}
+\[
+T(ax+by)=aTx+bTy.
+\]
+線形写像が本体であり、行列は基底を選んだ表現である。
+
+\textbf{2. 像と零空間}
+\[
+R_T=\{Tx:x\in X\},\qquad
+N_T=\{x:Tx=0\}.
+\]
+
+\textbf{3. rank--nullity}
+\[
+\boxed{\dim N_T+\dim R_T=\dim X},
+\qquad
+\boxed{X/N_T\simeq R_T}.
+\]
+
+\textbf{4. 有限次元・同次元}
+\[
+\boxed{\text{単射}\iff\text{全射}\iff\text{可逆}}.
+\]
+
+\textbf{5. 転置}
+\[
+\boxed{(T'l,x)=(l,Tx)}.
+\]
+出力側の測定を入力側へ引き戻す作用である。
+
+\textbf{6. 値域と転置零空間}
+\[
+\boxed{R_T^\perp=N_{T'}},
+\qquad
+\boxed{R_T=N_{T'}^\perp}.
+\]
+したがって $Tx=b$ の可解条件は $N_{T'}$ が決める。
+
+\textbf{7. rank}
+\[
+\boxed{\rank T=\rank T'}.
+\]
+これは行列の列階数＝行階数の抽象版である。
+
+\textbf{8. 相似}
+\[
+\boxed{M\sim SMS^{-1}}
+\]
+は同じ線形作用を異なる基底で表したものと理解する。
+
+\textbf{9. 射影}
+\[
+\boxed{P^2=P},
+\qquad
+\boxed{X=R_P\oplus N_P}.
+\]
+これは projection method、POD、PCA の基礎になる。
+
+\textbf{10. CFDへの中心的な流れ}
+\[
+\boxed{
+\text{線形作用素}
+\to
+\text{離散化}
+\to
+A\bm u=\bm b
+\to
+\text{kernel/range/rank}
+\to
+\text{一意性・可解性}
+}
+\]
+および
+\[
+\boxed{
+\text{射影}
+\to
+\text{Helmholtz/Hodge 分解}
+\to
+\text{非圧縮流 projection method}
+}.
+\]
+}}
+\end{center}
+
+\end{document}
