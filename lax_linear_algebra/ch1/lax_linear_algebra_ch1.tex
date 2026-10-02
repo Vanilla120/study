@@ -1,0 +1,951 @@
+\documentclass[a4paper,11pt]{ltjsarticle}
+
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\hypersetup{
+  hidelinks,
+  pdftitle={ラックス線形代数 第1章「基礎」学習ノート},
+  pdfauthor={Study Note}
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ラックス線形代数 第1章「基礎」}
+\rhead{学習ノート}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em}
+\setlist[enumerate]{leftmargin=2.2em,itemsep=0.35em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.35em}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\K}{\mathbb{K}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\Ker}{\operatorname{Ker}}
+\newcommand{\Image}{\operatorname{Im}}
+\newcommand{\sourceitem}{\textbf{【資料】}}
+\newcommand{\suppitem}{\textbf{【補足】}}
+\newcommand{\lowimportance}{\textbf{【重要度：低】}}
+\newcommand{\midimportance}{\textbf{【重要度：中】}}
+\newcommand{\highimportance}{\textbf{【重要】}}
+
+\title{\vspace{-1.5em}ラックス線形代数\\第1章「基礎」学習ノート}
+\author{}
+\date{2026年10月2日}
+
+\begin{document}
+\maketitle
+\vspace{-2em}
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\textbf{今日の中心テーマ：}
+「ベクトルを成分の並びとしてではなく、線形結合ができる抽象的な対象として捉える」こと。
+その上で、部分空間・線形独立・基底・次元・直和・商空間を一つの流れとして理解し、
+最終的に連立一次方程式と行列計算へ接続する。
+}}
+\end{center}
+
+\section{この範囲の目的}
+
+\sourceitem\ 第1章は、古典的な成分ベクトルの見方から離れ、抽象的な線形空間を導入する章である。
+章全体の流れは
+\[
+\boxed{
+\text{線形空間}
+\to \text{部分空間}
+\to \text{線形結合・線形独立}
+\to \text{基底・次元}
+\to \text{直和}
+\to \text{商空間}
+\to \text{次元公式}
+\to \text{連立一次方程式}
+}
+\]
+と整理できる。
+
+この抽象化の目的は、数の組だけでなく、関数・多項式・微分方程式の解なども同じ線形代数の言葉で扱えるようにすることである。
+
+\suppitem\ 数値解析の観点では、最終的に
+\[
+\boxed{
+\text{抽象的な関数や場}
+\xrightarrow{\text{基底を選ぶ}}
+\text{係数ベクトル}
+\xrightarrow{\text{線形作用素を離散化}}
+\text{行列計算}
+}
+\]
+という流れを理解するための基礎になる。
+これは有限要素法、スペクトル法、Galerkin 法、POD などに共通する。
+
+\section{必要な前提知識と既習内容との接続}
+
+この章を読むために必要なのは、主に次の内容である。
+\begin{itemize}
+  \item ベクトルの和とスカラー倍
+  \item 連立一次方程式の基本的な意味
+  \item 関数の加法・定数倍
+  \item 微分方程式の解を「関数の集合」として見る感覚
+\end{itemize}
+
+これまで成分ベクトルで行ってきた
+\[
+(x_1,\dots,x_n)+(y_1,\dots,y_n),\qquad
+c(x_1,\dots,x_n)
+\]
+という計算を、関数や解集合にも拡張して考えるのが本章である。
+
+\section{重要概念1：線形空間}
+
+\subsection{直観}
+線形空間とは、対象の見た目ではなく、\textbf{和とスカラー倍が整合的に定義されている空間}である。
+重要なのは「矢印であること」や「成分を持つこと」ではない。
+
+\subsection{定義}
+\sourceitem\ 体 $\K$ 上の線形空間 $X$ では、$x,y,z\in X$、$a,b\in\K$ に対して、
+和とスカラー倍が通常のベクトルと同じ規則を満たす。代表的には
+\begin{align*}
+ x+y &= y+x,\\
+ x+(y+z) &= (x+y)+z,\\
+ x+0 &= x,\\
+ x+(-x) &= 0,\\
+ a(x+y) &= ax+ay,\\
+ (a+b)x &= ax+bx,\\
+ a(bx) &= (ab)x,\\
+ 1x &= x
+\end{align*}
+である。
+
+\subsection{なぜこの定義が必要か}
+この公理系が保証しているのは、抽象的な対象についても
+\[
+ax+by
+\]
+のような線形結合を通常のベクトルと同じ規則で扱えることである。
+例えば
+\[
+0x=0,\qquad (-1)x=-x
+\]
+などは公理から導かれる。
+
+\lowimportance\ $0x=0$ や $(-1)x=-x$ の形式的証明そのものを暗記する必要はない。
+「抽象空間でも通常のベクトル計算が矛盾なく行える」という意味を理解することが重要である。
+
+\section{重要概念2：微分方程式の解もベクトルになる}
+
+\sourceitem\ 本章では
+\[
+\frac{d^2x}{dt^2}+x=0
+\]
+を満たすすべての関数の集合を例に取り、これが線形空間になることを説明している。
+
+$x,y$ が解なら
+\[
+x''+x=0,\qquad y''+y=0.
+\]
+したがって
+\begin{align*}
+(x+y)''+(x+y)
+&=(x''+x)+(y''+y)=0,\\
+(kx)''+kx
+&=k(x''+x)=0.
+\end{align*}
+よって解の和も定数倍も再び解である。
+
+この考え方の本質は、線形作用素
+\[
+Lx=x''+x
+\]
+を使えば解集合が
+\[
+\Ker L=\{x\mid Lx=0\}
+\]
+と書けることにある。
+
+\suppitem\ 今後は同じ構造が
+\[
+A\bm{x}=0,
+\qquad
+-\Delta u=0
+\]
+などにも現れる。すなわち、\textbf{同次な線形方程式の解集合は部分空間になる}という見方は、線形代数と PDE を結ぶ基本原理である。
+
+\section{重要概念3：同型}
+
+\sourceitem\ 加法とスカラー倍を保存する一対一対応があるとき、二つの線形空間は線形構造の意味で同じとみなせる。
+
+例えば
+\[
+x''+x=0
+\]
+の解は、初期値
+\[
+x(0)=p,\qquad x'(0)=v
+\]
+によって一意に決まる。
+実際、
+\[
+x(t)=p\cos t+v\sin t
+\]
+なので、
+\[
+x(t)\longleftrightarrow (p,v)\in\R^2
+\]
+と対応させられる。
+
+ここで理解すべきことは、\textbf{関数空間の要素でも、基底・座標を通して有限次元ベクトルとして表現できる}という点である。
+
+\section{重要概念4：部分空間}
+
+\subsection{定義}
+線形空間 $X$ の部分集合 $Y$ が部分空間であるためには、少なくとも
+\[
+y_1,y_2\in Y \Rightarrow y_1+y_2\in Y,
+\]
+\[
+y\in Y,\ a\in\K \Rightarrow ay\in Y
+\]
+が必要である。
+つまり、\textbf{線形結合をしても集合の外に出ない}。
+
+部分空間判定では、実際には次の三点を見るとよい。
+\begin{enumerate}
+  \item 零ベクトルを含むか
+  \item 加法で閉じているか
+  \item 任意のスカラー倍で閉じているか
+\end{enumerate}
+
+\subsection{CFDとの接続}
+\suppitem\ 例えば、適切な関数空間の中で
+\[
+V_{\mathrm{div}}
+=
+\{\bm{u}\mid \nabla\cdot\bm{u}=0\}
+\]
+を考える。$\nabla\cdot\bm{u}=0$、$\nabla\cdot\bm{v}=0$ なら
+\[
+\nabla\cdot(a\bm{u}+b\bm{v})=0
+\]
+なので、非圧縮速度場の集合は線形部分空間になる。
+これは後の Helmholtz 分解、Hodge 分解、projection method につながる。
+
+\section{重要概念5：線形結合と span}
+
+ベクトル $x_1,\dots,x_j$ に対する
+\[
+k_1x_1+\cdots+k_jx_j
+\]
+を線形結合という。
+
+それらすべての線形結合からなる集合を
+\[
+\Span\{x_1,\dots,x_j\}
+\]
+と書く。
+
+\highimportance\ $\Span\{x_1,\dots,x_j\}$ は、$x_1,\dots,x_j$ を含む\textbf{最小の部分空間}である。
+
+例えば
+\[
+e_1=\begin{pmatrix}1\\0\end{pmatrix},\qquad
+ e_2=\begin{pmatrix}0\\1\end{pmatrix}
+\]
+なら
+\[
+ae_1+be_2=\begin{pmatrix}a\\b\end{pmatrix}
+\]
+なので
+\[
+\Span\{e_1,e_2\}=\R^2.
+\]
+
+\section{重要概念6：線形独立と線形従属}
+
+$x_1,\dots,x_j$ に対して
+\[
+k_1x_1+\cdots+k_jx_j=0
+\]
+を考える。
+
+この式が
+\[
+k_1=\cdots=k_j=0
+\]
+という自明な解しか持たないとき、$x_1,\dots,x_j$ は線形独立である。
+非自明な係数が存在すれば線形従属である。
+
+線形従属なら、例えば $k_j\neq 0$ として
+\[
+x_j
+=-\frac{k_1}{k_j}x_1-\cdots-\frac{k_{j-1}}{k_j}x_{j-1}
+\]
+と書ける。
+
+したがって
+\[
+\boxed{\text{線形従属}=\text{表現に冗長な方向がある}}
+\]
+と理解できる。
+逆に線形独立とは、どのベクトルも他のベクトルの線形結合では代用できないことである。
+
+\section{重要概念7：基底と座標}
+
+基底とは、
+\[
+\boxed{\text{線形独立} + \text{空間全体を span}}
+\]
+するベクトル集合である。
+
+基底 $e_1,\dots,e_n$ があると、任意の $x\in X$ は
+\[
+x=a_1e_1+\cdots+a_ne_n
+\]
+と表される。
+しかも線形独立性のため、この係数 $a_1,\dots,a_n$ は一意である。
+
+したがって基底は、抽象的なベクトルに\textbf{座標}を与える装置である。
+
+\subsection{数値計算との接続}
+\suppitem\ 関数 $u$ を有限個の基底関数で
+\[
+u_h=\sum_{j=1}^{N}u_j\phi_j
+\]
+と近似すると、$u_h$ は係数ベクトル
+\[
+\bm{u}=(u_1,\dots,u_N)^T
+\]
+で表せる。
+したがって
+\[
+\boxed{
+\text{関数空間の問題}
+\xrightarrow{\text{基底を選ぶ}}
+\text{有限次元ベクトルの問題}
+}
+\]
+となる。
+これは有限要素法、スペクトル法、Galerkin 法、POD などの根本構造である。
+
+\section{重要概念8：次元}
+
+有限次元線形空間 $X$ の基底を構成するベクトルの個数は、基底の選び方によらず一定である。
+この個数を
+\[
+\dim X
+\]
+と定義する。
+
+\highimportance\ 次元の本質は「成分数」ではなく、
+\[
+\boxed{\text{空間を表現するために必要な独立な自由度の数}}
+\]
+である。
+
+本章で重要な考え方は、$n$ 個のベクトルで $X$ を span できるなら、$X$ 内の線形独立なベクトルは $n$ 個を超えない、という事実である。
+これは「独立な方向を一つ入れるごとに、span している集合から一つを置き換えられる」という交換の発想で理解するとよい。
+
+\suppitem\ 数値解析では $\dim X$ は自由度数（degrees of freedom, DOF）と直結する。
+
+\section{重要概念9：基底の拡張と補空間}
+
+有限次元線形空間では、線形独立なベクトル集合を基底まで拡張できる。
+例えば $Y\subset X$ の基底を取り、それにさらにベクトルを加えて $X$ の基底にすれば、追加したベクトルが張る部分空間を $Z$ として
+\[
+X=Y\oplus Z
+\]
+とできる。
+
+ここで $Z$ を $Y$ の補空間と考えられる。
+補空間は一般には一意ではない。
+
+\section{重要概念10：直和}
+
+二つの部分空間 $Y,Z$ に対して、任意の $x\in X$ が
+\[
+x=y+z,\qquad y\in Y,\ z\in Z
+\]
+と\textbf{一意に}表されるとき
+\[
+X=Y\oplus Z
+\]
+と書く。
+
+一意性は
+\[
+Y\cap Z=\{0\}
+\]
+と結びついている。
+実際、
+\[
+y_1+z_1=y_2+z_2
+\]
+なら
+\[
+y_1-y_2=z_2-z_1\in Y\cap Z.
+\]
+交わりが零ベクトルしか含まなければ、
+\[
+y_1=y_2,\qquad z_1=z_2
+\]
+となる。
+
+有限次元なら
+\[
+\boxed{\dim X=\dim Y+\dim Z}
+\]
+である。
+
+\subsection{CFDとの接続}
+\suppitem\ 直和分解は、後に学ぶ Helmholtz/Hodge 分解の有限次元的な原型として見るとよい。
+適切な条件では速度場を概念的に
+\[
+\bm{u}=\bm{u}_{\mathrm{div-free}}+\nabla\phi
+\]
+のように分解する。
+非圧縮流の projection method では、速度を divergence-free な部分へ射影するという考え方を用いる。
+
+\section{重要概念11：有限次元線形空間は $\K^n$ と同型}
+
+$\dim X=n$ とする。基底 $e_1,\dots,e_n$ を選ぶと
+\[
+x=a_1e_1+\cdots+a_ne_n
+\]
+なので
+\[
+x\longmapsto (a_1,\dots,a_n)
+\]
+によって $X$ を $\K^n$ と同一の線形構造として扱える。
+
+\[
+\boxed{\dim X=n\quad\Longrightarrow\quad X\simeq\K^n}
+\]
+
+ただし、この対応は基底の選択に依存する。
+基底が変われば座標は変わるが、空間そのものや次元は変わらない。
+
+\section{重要概念12：商空間 $X/Y$}
+
+\subsection{定義と直観}
+部分空間 $Y\subset X$ に対して
+\[
+x_1\equiv x_2\pmod{Y}
+\]
+を
+\[
+x_1-x_2\in Y
+\]
+によって定義する。
+
+つまり、二つのベクトルの違いが $Y$ 方向だけなら、商空間では同じものとして扱う。
+
+\[
+\boxed{X/Y=\text{$Y$ 方向の違いを無視した $X$}}
+\]
+
+例えば
+\[
+X=\R^3,\qquad Y=\Span\{e_3\}
+\]
+なら
+\[
+(1,2,3)\sim(1,2,10)
+\]
+である。第三成分だけが違うベクトルは同一視されるため、実質的には第一・第二成分だけが残る。
+したがって
+\[
+X/Y\simeq\R^2.
+\]
+
+\subsection{次元公式}
+$Y$ の基底を $y_1,\dots,y_j$ とし、それを $X$ の基底
+\[
+y_1,\dots,y_j,x_{j+1},\dots,x_n
+\]
+まで拡張する。
+
+商空間では $Y$ の方向がすべて零と同一視されるため、残る独立方向は
+\[
+\{x_{j+1}\},\dots,\{x_n\}
+\]
+である。したがって
+\[
+\dim(X/Y)=n-j.
+\]
+ゆえに
+\[
+\boxed{\dim Y+\dim(X/Y)=\dim X}.
+\]
+
+\subsection{CFDとの重要な接続：圧力の定数不定性}
+\suppitem\ 非圧縮 Navier--Stokes 方程式では、圧力はしばしば $p$ と $p+C$ を区別できない。
+なぜなら
+\[
+\nabla(p+C)=\nabla p
+\]
+だからである。
+このとき圧力は概念的に
+\[
+\text{圧力空間}/\{\text{定数関数}\}
+\]
+という商空間として考えられる。
+
+数値計算では、これに対応して
+\begin{itemize}
+  \item 平均圧力を $0$ にする
+  \item 1点の圧力を固定する
+\end{itemize}
+などにより冗長な自由度を除去することがある。
+
+\section{重要概念13：部分空間の和と交わり}
+
+部分空間 $U,V$ に対して
+\[
+U+V=\{u+v\mid u\in U,\ v\in V\}
+\]
+を考える。
+有限次元の場合、
+\[
+\boxed{
+\dim(U+V)
+=
+\dim U+
+\dim V-
+\dim(U\cap V)
+}
+\]
+である。
+
+これは $U\cap V$ に属する方向を $\dim U+\dim V$ の中で二重に数えているため、その分を一度引くと理解するとよい。
+
+\sourceitem\ 本章末の練習問題は、三つ以上の部分空間について集合の包除原理をそのまま次元に適用できないことを考えさせる構成になっている。
+
+\section{外部直和}
+
+別々の線形空間 $X_1,X_2$ から
+\[
+X_1\oplus X_2
+=
+\{(x_1,x_2)\mid x_1\in X_1,\ x_2\in X_2\}
+\]
+を作れる。
+有限次元なら
+\[
+\dim(X_1\oplus X_2)=\dim X_1+\dim X_2.
+\]
+
+\midimportance\ 内部直和 $X=Y\oplus Z$ と外部直和 $X_1\oplus X_2$ の違いを認識できれば、今回は十分である。
+
+\section{章末の到達点：線形独立性から連立一次方程式へ}
+
+本章最後では、複数のベクトル $v_1,\dots,v_n$ が線形独立かどうかを調べるため、
+\[
+k_1v_1+\cdots+k_nv_n=0
+\]
+を解く問題へ帰着している。
+
+ベクトルを列に並べた行列
+\[
+A=[v_1\ \cdots\ v_n]
+\]
+を使えば
+\[
+A\bm{k}=0
+\]
+である。
+
+したがって
+\[
+\boxed{
+\text{線形独立性}
+\longrightarrow
+\text{同次連立一次方程式}
+\longrightarrow
+\text{行列計算}
+}
+\]
+という接続が得られる。
+これは次章以降の Gaussian elimination、rank、逆行列などへの入口である。
+
+\section{数値解析・CFD・乱流・MLとの接続}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.26\linewidth}p{0.66\linewidth}}
+\toprule
+\textbf{第1章の概念} & \textbf{今後の接続}\\
+\midrule
+線形空間 & 関数空間、速度場、圧力場、離散状態空間\\
+部分空間 & 境界条件を満たす空間、divergence-free 空間\\
+span & 基底関数から作る近似空間\\
+線形独立 & 独立自由度、rank、冗長性の判定\\
+基底 & FEM 基底、Fourier 基底、固有モード、POD モード\\
+次元 & 自由度数 DOF、低次元モデルの次元\\
+直和 & Helmholtz/Hodge 分解、projection の考え方\\
+商空間 & 圧力の定数不定性、冗長自由度の除去\\
+線形従属 & rank deficiency、特異行列、悪条件性\\
+同型 & 関数を係数ベクトルへ変換すること\\
+低次元部分空間 & POD、PCA、reduced-order model\\
+\bottomrule
+\end{longtable}
+
+\subsection{乱流・MLへの接続}
+\suppitem\ CFD のスナップショット $\bm{u}^{(1)},\dots,\bm{u}^{(m)}$ が張る部分空間を考えると、POD/PCA はその中から重要な独立方向を抽出する問題と見られる。
+今後 SVD を学ぶと、
+\[
+\boxed{
+\text{span・独立性・基底・次元}
+\longrightarrow
+\text{SVD}
+\longrightarrow
+\text{POD/PCA}
+}
+\]
+というつながりが明確になる。
+
+\section{数学的独立と数値的独立の違い}
+
+数学的にはベクトルは線形独立か線形従属かのどちらかである。
+しかし浮動小数点計算では、例えば
+\[
+v_4=v_1+v_2+\varepsilon r,
+\qquad |\varepsilon|\ll1
+\]
+のような状況がある。
+$\varepsilon\neq0$ なら数学的には独立でも、$\varepsilon$ が非常に小さければ数値的にはほぼ従属である。
+
+このとき
+\begin{itemize}
+  \item 連立方程式の解が丸め誤差に敏感になる
+  \item 行列の条件数が大きくなる
+  \item 線形ソルバの収束や精度に影響する
+  \item 回帰や ML では多重共線性に対応する問題が起こる
+\end{itemize}
+
+\suppitem\ 後に SVD を学ぶと、最小特異値 $\sigma_{\min}$ を用いて「どの程度、従属に近いか」を数値的に調べられる。
+
+\section{今回は深追いしなくてよい細部}
+
+以下は定義の整合性としては必要だが、現段階で証明手順を暗記する価値は低い。
+\begin{itemize}
+  \item $0x=0$、$(-1)x=-x$ の形式的証明
+  \item 零ベクトルの一意性の細かな証明
+  \item 商空間の合同関係が反射律・対称律・推移律を満たすことの逐語的確認
+  \item 商空間の演算が代表元によらないことの細かな式変形
+  \item 外部直和について線形空間の公理を一つずつ確認すること
+\end{itemize}
+
+ただし、\textbf{何を仮定した結果、どの構造が使えるようになるのか}は説明できるようにする。
+特に商空間そのものの意味は、CFD でも再登場するため飛ばさない。
+
+\section{よくある誤解}
+
+\begin{enumerate}
+  \item \textbf{「ベクトル＝矢印や数列」ではない。}\\
+  本章以降では、ベクトルとは線形空間の要素であり、関数もベクトルになり得る。
+
+  \item \textbf{「span していれば基底」ではない。}\\
+  基底には線形独立性も必要である。
+
+  \item \textbf{「線形独立なら基底」でもない。}\\
+  空間全体を span する必要がある。
+
+  \item \textbf{次元は単なる成分数ではない。}\\
+  本質は独立な自由度の数である。
+
+  \item \textbf{商空間は「$Y$ を削除する」操作ではない。}\\
+  $Y$ 方向の差を同一視する操作である。
+
+  \item \textbf{$\dim(U+V)=\dim U+\dim V$ とは限らない。}\\
+  $U\cap V$ の重複分を引く必要がある。
+\end{enumerate}
+
+\section{自分で説明できるべき事項}
+
+今日の学習後、次を本を見ずに説明できれば十分である。
+\begin{enumerate}
+  \item なぜ関数や微分方程式の解をベクトルと呼べるのか。
+  \item 部分空間を判定するために何を確認すればよいか。
+  \item span と線形独立の違いは何か。
+  \item なぜ「線形独立＋span」で基底になるのか。
+  \item 次元は何を数えているのか。
+  \item なぜ有限次元線形空間を $\K^n$ とみなせるのか。
+  \item 直和で「一意な分解」がなぜ重要なのか。
+  \item 商空間 $X/Y$ は何を意味しているのか。
+  \item なぜ $\dim Y+\dim(X/Y)=\dim X$ なのか。
+  \item なぜ $\dim(U+V)$ では $\dim(U\cap V)$ を引くのか。
+  \item 線形独立性の判定がなぜ $A\bm{x}=0$ の問題になるのか。
+\end{enumerate}
+
+\section{今日必ず理解すべき事項}
+
+\begin{enumerate}
+  \item 線形空間は「和とスカラー倍」の構造によって定義される。
+  \item 関数や線形微分方程式の解もベクトルになり得る。
+  \item 部分空間とは線形結合について閉じた集合である。
+  \item $\Span$ は与えたベクトルを含む最小の部分空間である。
+  \item 線形独立とは、表現に冗長な方向がないことである。
+  \item 基底は「線形独立＋空間全体を span」であり、座標表示を一意にする。
+  \item 次元は独立な自由度の数である。
+  \item $\dim X=n$ なら、基底を選ぶことで $X\simeq\K^n$ とみなせる。
+  \item $X=Y\oplus Z$ は各 $x$ が $y+z$ と一意に分解できることを意味する。
+  \item $X/Y$ は $Y$ 方向の違いを無視した空間である。
+  \item
+  \[
+  \dim Y+\dim(X/Y)=\dim X
+  \]
+  の意味を説明できる。
+  \item
+  \[
+  \dim(U+V)=\dim U+\dim V-\dim(U\cap V)
+  \]
+  の意味を説明できる。
+  \item 線形独立性の判定が同次連立一次方程式 $A\bm{x}=0$ に帰着することを理解する。
+\end{enumerate}
+
+\section{理解確認問題}
+
+\begin{enumerate}
+  \item なぜ $\R^3$ のベクトルと関数 $f(t)$ を同じ「ベクトル」という言葉で扱えるのか。
+  \item 非同次方程式
+  \[
+  x''+x=1
+  \]
+  の解集合は線形空間になるか。特に零関数を含むかを考えよ。
+  \item 「span する」と「線形独立」の違いを自分の言葉で説明せよ。
+  \item なぜ基底を用いると座標表示が一意になるのか。
+  \item 基底を変更すると座標は変わるのに、なぜ次元は変わらないのか。
+  \item $X=Y\oplus Z$ において、なぜ $Y\cap Z=\{0\}$ が必要なのか。
+  \item 商空間 $X/Y$ を「$Y$ を削除した空間」ではなく「$Y$ 方向を区別しない空間」と言うべきなのはなぜか。
+  \item なぜ $\dim(U+V)$ では $\dim(U\cap V)$ を引く必要があるのか。
+  \item 非圧縮流で $p$ と $p+C$ が同じ圧力場として扱われる状況を、商空間と結びつけて説明せよ。
+  \item CFD で基底関数を選ぶことが、なぜ関数を数値ベクトルへ変換することになるのか。
+\end{enumerate}
+
+\section{手計算すべき問題}
+
+\subsection*{問題A：部分空間判定}
+$x=(x_1,\dots,x_n)\in\R^n$ について、次の集合が部分空間か判定せよ。
+\begin{align*}
+\text{(a)}\ &x_1\ge 0,\\
+\text{(b)}\ &x_1+x_2=0,\\
+\text{(c)}\ &x_1+x_2+1=0,\\
+\text{(d)}\ &x_1=0,\\
+\text{(e)}\ &x_1\in\mathbb{Z}.
+\end{align*}
+各問について、零ベクトル・加法・スカラー倍を確認すること。
+
+\subsection*{問題B：線形独立性と連立方程式}
+本章末で扱われる4本のベクトルについて
+\[
+k_1v_1+k_2v_2+k_3v_3+k_4v_4=0
+\]
+を成分ごとの連立一次方程式に変換し、非自明解の有無を調べる。
+目的は、
+\[
+\text{線形独立性}\longleftrightarrow A\bm{k}=0
+\]
+を手計算で確認することである。
+
+\subsection*{問題C：商空間}
+\[
+X=\R^3,\qquad Y=\Span\{e_3\}
+\]
+とする。
+\begin{enumerate}
+  \item $(1,2,3)$ と同じ同値類に属するベクトルを3つ書け。
+  \item $X/Y$ の基底に対応する方向を与えよ。
+  \item $\dim(X/Y)$ を求めよ。
+  \item $\dim Y+\dim(X/Y)=\dim X$ を確認せよ。
+\end{enumerate}
+
+\subsection*{問題D：補空間}
+\[
+Y=\Span\left\{\begin{pmatrix}1\\1\\0\end{pmatrix}\right\}
+\subset\R^3
+\]
+について
+\[
+\R^3=Y\oplus Z
+\]
+となる $Z$ を二通り作り、補空間が一般には一意でないことを確認せよ。
+
+\section{明日の数値実験・Python実装課題}
+
+\subsection{テーマ}
+\[
+\boxed{\text{「線形独立」と「数値的にほぼ線形従属」の違いを観察する}}
+\]
+
+\subsection{数学的問題}
+ベクトルを列に並べた行列
+\[
+A=[v_1\ v_2\ v_3\ v_4]
+\]
+を考える。
+線形独立なら
+\[
+A\bm{k}=0
+\]
+の解は $\bm{k}=0$ だけである。
+
+次に人工的に
+\[
+v_4(\varepsilon)=v_1+v_2+\varepsilon r
+\]
+とする。
+$\varepsilon=0$ なら線形従属であり、$\varepsilon\neq0$ でも非常に小さい場合は数値的にほぼ従属になる。
+
+\subsection{実験する値}
+例えば
+\[
+\varepsilon=10^{-2},\ 10^{-6},\ 10^{-10},\ 10^{-14}
+\]
+を用いる。
+
+\subsection{アルゴリズム}
+\begin{enumerate}
+  \item NumPy 配列として $v_1,v_2,v_3$ と乱数ベクトル $r$ を作る。
+  \item 各 $\varepsilon$ について $v_4(\varepsilon)$ を作る。
+  \item 列方向に並べて行列 $A(\varepsilon)$ を作る。
+  \item \verb|np.linalg.matrix_rank| で rank を調べる。
+  \item \verb|np.linalg.svd| で特異値を計算する。
+  \item 最小特異値 $\sigma_{\min}$ を記録する。
+  \item 条件数
+  \[
+  \kappa_2(A)=\frac{\sigma_{\max}}{\sigma_{\min}}
+  \]
+  を調べる。
+  \item $\varepsilon$ と $\sigma_{\min}$ の関係を両対数グラフで確認する。
+\end{enumerate}
+
+\subsection{実装の骨格}
+以下は完成コードではなく、実装順序の骨格である。
+\begin{verbatim}
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. v1, v2, v3, r を定義する
+# 2. eps_values を用意する
+# 3. sigma_min_values = [] などを用意する
+
+for eps in eps_values:
+    # v4 = ...
+    # A = np.column_stack(...)
+    # rank を計算
+    # SVD を計算
+    # 最小特異値と条件数を保存
+
+# 4. eps と sigma_min の関係をプロット
+# 5. 数値結果を理論的な線形独立性と比較
+\end{verbatim}
+
+\subsection{検証すべきこと}
+\begin{itemize}
+  \item $\varepsilon\to0$ で $\sigma_{\min}\to0$ となるか。
+  \item $\varepsilon\to0$ で条件数が増大するか。
+  \item 数学的には rank が保たれていても、浮動小数点では rank 判定が変化することがあるか。
+  \item 手計算で得た独立性と NumPy の結果が整合するか。
+\end{itemize}
+
+この実験は
+\[
+\boxed{
+\text{線形独立}
+\to \text{rank}
+\to \text{SVD}
+\to \text{条件数}
+\to \text{POD/PCA}
+}
+\]
+への準備になる。
+
+\section{次に学ぶ内容との接続}
+
+本章の最後で、線形独立性の判定が同次連立一次方程式へ帰着した。
+したがって次の中心課題は
+\[
+\boxed{A\bm{x}=\bm{b}\text{ をどのように解くか}}
+\]
+である。
+
+今後の流れは概念的に
+\[
+\text{連立一次方程式}
+\to \text{行列}
+\to \text{Gaussian elimination}
+\to \text{rank}
+\to \text{固有値・固有ベクトル}
+\to \text{SVD}
+\]
+とつながる。
+
+さらに研究準備としては
+\[
+\text{固有値・固有ベクトル}
+\leftrightarrow
+\text{PDE のモード・安定性},
+\]
+\[
+\text{SVD}
+\leftrightarrow
+\text{POD・PCA・低次元モデル}
+\]
+へ接続する。
+
+\section{長期記憶用要点}
+
+今後繰り返し使う内容は、次の形で記憶する。
+
+\begin{align*}
+\boxed{\text{線形空間}}\quad
+&\text{和とスカラー倍の構造で定義される},\\[0.5em]
+\boxed{\Span\{v_i\}}\quad
+&\text{$v_i$ から作れる全線形結合},\\[0.5em]
+\boxed{\text{線形独立}}\quad
+&\sum_i a_i v_i=0\Rightarrow a_i=0,\\[0.5em]
+\boxed{\text{基底}}\quad
+&=\text{線形独立}+\text{空間全体を span},\\[0.5em]
+\boxed{\dim X}\quad
+&=\text{独立な自由度の数},\\[0.5em]
+\boxed{\dim X=n}\quad
+&\Rightarrow X\simeq\K^n,\\[0.5em]
+\boxed{X=Y\oplus Z}\quad
+&\Rightarrow \dim X=\dim Y+\dim Z,\\[0.5em]
+\boxed{X/Y}\quad
+&=\text{$Y$ 方向の違いを無視した空間},\\[0.5em]
+\boxed{\dim X}\quad
+&=\dim Y+\dim(X/Y),\\[0.5em]
+\boxed{\dim(U+V)}\quad
+&=\dim U+\dim V-\dim(U\cap V).
+\end{align*}
+
+最後に、数値計算への最重要接続は
+\[
+\boxed{
+\text{抽象空間}
+\xrightarrow{\text{基底}}
+\text{座標ベクトル}
+\xrightarrow{\text{線形作用素}}
+\text{行列}
+}
+\]
+である。
+
+この章の中では特に
+\[
+\boxed{
+\text{部分空間・線形独立・基底・次元・直和・商空間}
+}
+\]
+を長期的に保持する価値が高い。
+
+\end{document}
